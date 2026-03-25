@@ -1,0 +1,14 @@
+info face="comic_sans" size=64 bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=1 aa=1 padding=0,5,0,5 spacing=1,1 outline=0
+common lineHeight=62 base=49 scaleW=128 scaleH=200 pages=1 packed=0 alphaChnl=0 redChnl=4 greenChnl=4 blueChnl=4
+page id=0 file="font_0.png"
+chars count=10
+char id=48   x=77    y=38    width=35    height=35    xoffset=-4    yoffset=15    xadvance=27    page=0  chnl=15
+char id=49   x=0     y=118   width=25    height=34    xoffset=-2    yoffset=15    xadvance=20    page=0  chnl=15
+char id=54   x=35    y=81    width=33    height=35    xoffset=-3    yoffset=15    xadvance=27    page=0  chnl=15
+char id=55   x=88    y=0     width=36    height=36    xoffset=-4    yoffset=14    xadvance=27    page=0  chnl=15
+char id=56   x=69    y=81    width=33    height=35    xoffset=-3    yoffset=15    xadvance=27    page=0  chnl=15
+char id=57   x=0     y=45    width=34    height=36    xoffset=-3    yoffset=15    xadvance=27    page=0  chnl=15
+char id=74   x=49    y=0     width=38    height=37    xoffset=-4    yoffset=15    xadvance=30    page=0  chnl=15
+char id=75   x=0     y=82    width=34    height=35    xoffset=-1    yoffset=15    xadvance=27    page=0  chnl=15
+char id=81   x=0     y=0     width=48    height=44    xoffset=-4    yoffset=15    xadvance=39    page=0  chnl=15
+char id=84   x=35    y=45    width=41    height=35    xoffset=-3    yoffset=14    xadvance=31    page=0  chnl=15
