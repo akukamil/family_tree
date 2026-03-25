@@ -2797,7 +2797,8 @@ main_menu={
 	open_my_tree_down(){
 		
 		this.close()
-		tree.show_root_person(0,0)
+		cur_root_id=0
+		tree.show_root_person(cur_root_id,0)
 			
 	},
 	
