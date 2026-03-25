@@ -713,7 +713,7 @@ class new_person_card_class extends PIXI.Container{
 		
 		//если нет текстуры то добавляем в загрузку, потом применится
 		if(!texture){
-			photo_loader.add(this.id)
+			photo_loader.add({id:this.id})
 			texture=assets.nophoto
 		}
 
@@ -892,10 +892,11 @@ photo_loader={
 	cache:[],
 	loader:new PIXI.Loader(),
 	on:0,
-	add(id){
+	add(data){
 		
-		if (this.queue.includes(id)||this.done.includes(id)) return
-		this.queue.push(id)
+		
+		if (this.queue.find(v=>v.id===data.id)||this.done.includes(data.id)) return
+		this.queue.push(data)
 		
 		//если нет очереди то запускаем процесс
 		if (this.on===0)
@@ -914,7 +915,9 @@ photo_loader={
 	async process(){	
 		
 		this.on=1
-		const id=this.queue.shift()
+		const data=this.queue.shift()
+		const id=data.id
+		const url=data.url
 		const img_name=my_data.uid+'/img'+id
 		this.done.push(id)
 		
@@ -925,12 +928,22 @@ photo_loader={
 		need_render=1
 		
 		try{
-			const data = await s3.getObject({Bucket: 'gen-tree',Key:img_name}).promise()
-			if (data){
-				this.loader.add(img_name,data.Body.toString())
+			
+			if (url){
+				this.loader.add(img_name,url)
 				await new Promise(r=>this.loader.load(r))
 				this.cache[id]=this.loader.resources[img_name].texture
+			}else{
+				
+				const data = await s3.getObject({Bucket: 'gen-tree',Key:img_name}).promise()
+				if (data){
+					this.loader.add(img_name,data.Body.toString())
+					await new Promise(r=>this.loader.load(r))
+					this.cache[id]=this.loader.resources[img_name].texture
+				}				
 			}
+
+			
 		}catch(e){
 			this.cache[id]=assets.nophoto
 			console.log(e)
@@ -3261,11 +3274,11 @@ async function init_game_env(lang) {
 	//новое дерево
 	if (Object.keys(familyData).length===0){
 		//загружаем фото и созжаем первую персону
-		await photo_loader.load_from_url(0,my_data.orig_pic_url)
+		photo_loader.add({id:0,url:my_data.orig_pic_url})
 		familyData[0]={id:0,name:my_data.name,bd:'',dd:'',fold:0,sex:0,spouses:[],parents:[],kids:[]}
 	}else{
 		//загружаем основного для отображения на кнопке
-		photo_loader.add(0)
+		photo_loader.add({id:0})
 	}
 	
 	
