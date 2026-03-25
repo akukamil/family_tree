@@ -1221,6 +1221,7 @@ tree={
 		this.auto_fold=auto_fold
 		
 		objects.cards_cont.visible=true
+		objects.cards_cont.y=0
 		objects.controls_cont.visible=true
 		objects.controls_fold_t.text=this.fold_lev
 		
