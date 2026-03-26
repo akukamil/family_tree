@@ -15,6 +15,8 @@ const rel_map={
 	'ppp':['прадед.','прабаб.'],
 	's':['муж','жена'],
 	'c':['сын','дочь'],
+	'cs':['зять','невестка'],
+	'cc':['внук','внучка'],
 	'pc':['брат','сестра'],
 	'ppcc':['2-брат','2-сестра'],
 	'pcs':['зять','невестка'],
@@ -1010,10 +1012,7 @@ tree={
 	cur_tar_id:0,
 	update_on:0,
 	graph:{},
-	start_y:0,
-	start_x:0,
-	start_y_cont:0,
-	start_x_cont:0,
+	touches:[0,0],
 	
 	make_rel_graph(tar_id=0) {
 		
@@ -1047,32 +1046,30 @@ tree={
 				p.rel_dist=rel_data.length-1
 				p.rel=rel_data.join('')
 			}
-
-
 		})
 	
 	},
 	
 	get_rel(start, target) {
 		
-		const queue = [[start, [],[]]];
-		const visited = new Set();
+		const queue = [[start,[],[]]]
+		const visited = new Set()
 
 		while (queue.length) {
-			const [current, path, id_path] = queue.shift();
+			const [current, path, id_path] = queue.shift()
 
 			if (current === target) return [path, id_path]
 
-			visited.add(current);
+			visited.add(current)
 
 			for (const edge of this.graph[current] || []) {
 				if (!visited.has(edge.id)) {
-					queue.push([edge.id,[...path, edge.rel],[...id_path,edge.id]]);
+					queue.push([edge.id,[...path, edge.rel],[...id_path,edge.id]])
 				}
 			}
 		}
 
-		return 999
+		return [[],0]
 	},
 	
 	link(id1,id2){		
@@ -1353,13 +1350,18 @@ tree={
 	},
 	
 	down(e){
-		
+
 		need_render=1
+
+		const id=e.data.identifier
+		const mx=e.data.global.x/app.stage.scale.x
+		const my=e.data.global.y/app.stage.scale.y
+
+		this.touches[id]={sx:mx,sy:my,x:mx,y:my}
 		this.start_y=e.data.global.y/app.stage.scale.y
 		this.start_x=e.data.global.x/app.stage.scale.x
 		this.start_y_cont=objects.cards_cont.y
 		this.start_x_cont=objects.cards_cont.x
-		
 		
 	},
 	
@@ -1367,17 +1369,40 @@ tree={
 		
 		
 		if (!this.start_y) return
+		if (!this.touches[0])return
+		if (!this.touches[1])return
 		
 		need_render=1
 		drag++
+		
+		const id=e.data.identifier
+		const cur_touch=this.touches[id]
 		const my=e.data.global.y/app.stage.scale.y
-		const mx=e.data.global.x/app.stage.scale.x
-		const dy=my-this.start_y
-		const dx=mx-this.start_x
-		objects.cards_cont.y=this.start_y_cont+dy
-		objects.cards_cont.x=this.start_x_cont+dx
-		if (objects.cards_cont.y>0) objects.cards_cont.y=0
-		if (objects.cards_cont.x>0) objects.cards_cont.x=0
+		const mx=e.data.global.x/app.stage.scale.x	
+		
+		//начальный отрезок между пальцами
+		const sx1=this.touches[0].sx
+		const sy1=this.touches[0].sy
+		const sx2=this.touches[1].sx
+		const sy2=this.touches[1].sy
+		let dx=sx2-sx1
+		let dy=sy2-sy1
+		const init_dist=Math.sqrt(dx*dx+dy*dy)
+		
+		
+		//текущий отрезок между пальцами
+		const cx1=this.touches[0].x
+		const cy1=this.touches[0].y
+		const cx2=this.touches[1].x
+		const cy2=this.touches[1].y
+		dx=cx2-cx1
+		dy=cy2-cy1
+		const cur_dist=Math.sqrt(dx*dx+dy*dy)
+		
+		
+		const scale_factor=cur_dist/init_dist
+		
+		objects.cards_cont.scale_xy=scale_factor
 		
 	},
 		
@@ -1517,8 +1542,11 @@ tree={
 			throw error;
 		}
 	},
-	
-	up(){
+
+	up(e){
+		
+		const id=e.data.identifier
+		this.touches[id]=0
 		
 		drag=0
 		this.start_y=0
@@ -2228,21 +2256,30 @@ add_dlg={
 		}
 	
 		if (familyData[this.id].kids.length){
-			alert('еееееееееее555')
+			alert('Нужно сначала удалить потомков')
 			return
 		}
 		
-		for (let pdata of Object.values(familyData)){		
+		if (this.id===0){
+			alert('Нельзя удалять основного человека')
+			return
+		}
+		
+		//удаляем ссылки
+		for (let pdata of Object.values(familyData)){
 
+			//как супруг у других людей
 			const spouse_ind = pdata.spouses.indexOf(this.id)
 			if (spouse_ind>-1){
 				pdata.spouses.splice(spouse_ind, 1)
 			}	
 			
+			//как ребенок
 			const kid_ind = pdata.kids.indexOf(this.id)
 			if (kid_ind>-1){
 				pdata.kids.splice(kid_ind, 1)
 			}			
+		
 		}
 		
 		delete familyData[this.id]
@@ -2265,38 +2302,12 @@ add_dlg={
 	},
 	
 	ok_down(){
-				
-				
-		if (this.type==='add_first_person'){	
+
 		
-			if (!this.updated){
-				//alert('обнови')
-				return
-			}
-			
-			const name=objects.add_dlg_name_t.text
-			const bd=objects.add_dlg_bd_t.text
-			const dd=objects.add_dlg_dd_t.text
-			const sex=this.sex
-			
-			if(this.updated_photo)
-				photo_loader.cache[0]=new PIXI.Texture(this.updated_photo.baseTexture)	
-			
-			familyData[0]={id:0,name,bd,dd,fold:0,sex:this.sex,spouses:[],parents:[],kids:[]}
-			
-			
-			//закрываем главное меню
-			main_menu.show_1_person()			
-
-			
-
-			
-		}					
-				
 		if (this.type==='add_child'){	
 		
 			if (!this.updated){
-				alert('йцу')
+				alert('Нужно добавить имя ребенка!')
 				return
 			}
 		
@@ -2320,7 +2331,7 @@ add_dlg={
 		if (this.type==='add_spouse'){	
 
 			if (!this.updated){
-				alert('вап')
+				alert('Нужно добавить имя супруга/супруги!')
 				return
 			}
 
@@ -2342,7 +2353,7 @@ add_dlg={
 			
 			if(this.updated) {
 				
-				const pdata=familyData[this.id]		
+				const pdata=familyData[this.id]
 				pdata.name=objects.add_dlg_name_t.text
 				pdata.bd=objects.add_dlg_bd_t.text
 				pdata.dd=objects.add_dlg_dd_t.text
@@ -2364,9 +2375,10 @@ add_dlg={
 		}
 		
 		//this.set_photo(objects.add_dlg_photo.texture)
-		if (this.id)
+		if (this.id&&this.updated)
 			delete familyData[this.id].empty
 		
+		tree.make_rel_graph()
 		tree.show_root_person(cur_root_id,0)
 		if (this.updated) tree.save()
 		this.close()
