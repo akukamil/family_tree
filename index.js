@@ -2969,8 +2969,8 @@ keyboard={
 }
 
 function resize() {
-    const vpw = window.innerWidth;  // Width of the viewport
-    const vph = window.innerHeight; // Height of the viewport
+    const vpw = document.body.clientWidth;  // Width of the viewport
+    const vph = document.body.clientHeight; // Height of the viewport
     let nvw; // New game width
     let nvh; // New game height
 
