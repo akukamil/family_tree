@@ -1378,7 +1378,9 @@ tree={
 		const id=e.data.identifier
 		const cur_touch=this.touches[id]
 		const my=e.data.global.y/app.stage.scale.y
-		const mx=e.data.global.x/app.stage.scale.x	
+		const mx=e.data.global.x/app.stage.scale.x
+		cur_touch.x=mx
+		cur_touch.y=my
 		
 		//начальный отрезок между пальцами
 		const sx1=this.touches[0].sx
