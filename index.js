@@ -1433,7 +1433,7 @@ tree={
 			const dx = curCenter.x - this.start_center.x
 			const dy = curCenter.y - this.start_center.y
 			objects.cards_cont.x=this.start_center.x+dx
-			objects.cards_cont.y=this.start_center.y+dx
+			objects.cards_cont.y=this.start_center.y+dy
 		}
 
 		// 🟢 DRAG
