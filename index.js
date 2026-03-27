@@ -8,6 +8,12 @@ let s3
 let drag=0
 let need_render=1
 
+irnd = function(min,max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 const rel_map={
 	'p':['отец','мать'],
 	'pp':['дед.','бабуш.'],
@@ -1012,7 +1018,8 @@ tree={
 	cur_tar_id:0,
 	update_on:0,
 	graph:{},
-	touches:{},
+	cont_start_pos:{x:0,y:0},
+	touches:[],
 	initialPinchDist:null,
 	start_scale:0,
 	start_center:0,
@@ -1371,38 +1378,42 @@ tree={
 	down(e){
 
 		need_render=1
-
+		
 		const id=e.data.identifier
 		const mx=e.data.global.x/app.stage.scale.x
 		const my=e.data.global.y/app.stage.scale.y
-		
+		//console.log({id})
 		this.touches[id] = {
 			start:{x:mx,y:my},
 			prev:{x:mx,y:my},
-			current:{x:mx,y:my}
+			current:{x:mx,y:my},
+			id
 		}
 
-		console.log({id,mx,my})
+		//console.log({id,mx,my})
 	
 		// if second finger added → initialize pinch
 		if (Object.keys(this.touches).length === 2) {
-			const pts = Object.values(this.touches)			
-			const d=this.vec_dist(this.touches[0].start,this.touches[1].start)
+
+			//console.log(this.touches.map(v=>v.id))
+			const d=this.vec_dist(this.touches[0].current,this.touches[1].current)
 			this.initialPinchDist = d
 			
 			this.start_scale=objects.cards_cont.scale_xy
 			
-			this.start_center=this.mid_point(this.touches[0].start,this.touches[1].start)
+			this.cont_start_pos.x=objects.cards_cont.x
+			this.cont_start_pos.y=objects.cards_cont.y
+			
+			this.start_center=this.mid_point(this.touches[0].current,this.touches[1].current)
 
 		}
 		
 	},
-
 	
 	move(e){
 		
 		const id=e.data.identifier
-		
+		//console.log({id})
 		//if (!this.start_y) return
 		if (!this.touches[id]) return
 		
@@ -1428,12 +1439,22 @@ tree={
 			const scaleFactor = curDist / this.initialPinchDist
 			const newScale = this.start_scale * scaleFactor
 			objects.cards_cont.scale_xy = newScale
+			//console.log(curDist,this.initialPinchDist)
 			
 			const curCenter = this.mid_point(touchList[0].current,touchList[1].current)
 			const dx = curCenter.x - this.start_center.x
 			const dy = curCenter.y - this.start_center.y
-			objects.cards_cont.x=this.start_center.x+dx
-			objects.cards_cont.y=this.start_center.y+dy
+			//objects.cards_cont.x=this.cont_start_pos.x+dx
+			//objects.cards_cont.y=this.cont_start_pos.y+dy
+			const scaleChange = newScale / this.start_scale
+			objects.cards_cont.x = curCenter.x - (this.start_center.x - this.cont_start_pos.x) * scaleChange
+			objects.cards_cont.y = curCenter.y - (this.start_center.y - this.cont_start_pos.y) * scaleChange
+		
+			if (objects.cards_cont.x>0)
+				objects.cards_cont.x=0
+			
+			if (objects.cards_cont.y>0)
+				objects.cards_cont.y=0
 		}
 
 		// 🟢 DRAG
@@ -1441,12 +1462,17 @@ tree={
 			const t = touchList[0]
 
 			const d_vec = {
-				x: t.current.x - t.prev.x,
-				y: t.current.y - t.prev.y
+				x:t.current.x-t.prev.x,
+				y:t.current.y-t.prev.y
 			}
 
 			objects.cards_cont.x += d_vec.x
 			objects.cards_cont.y += d_vec.y
+			if (objects.cards_cont.x>0)
+				objects.cards_cont.x=0
+			
+			if (objects.cards_cont.y>0)
+				objects.cards_cont.y=0
 		}		
 		
 	},
@@ -1603,7 +1629,6 @@ tree={
 			throw error;
 		}
 	},
-
 
 }
 
@@ -3246,7 +3271,7 @@ async function define_platform_and_language(p) {
 		return;
 	}
 	game_platform = 'UNKNOWN';
-	LANG = await language_dialog.show();
+	LANG = 0
 
 
 }
