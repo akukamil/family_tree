@@ -1411,7 +1411,7 @@ tree={
 			)
 
 			if (this.initialPinchDist !== null) {
-				const scaleFactor = curDist / initialPinchDist
+				const scaleFactor = curDist / this.initialPinchDist
 				objects.cards_cont.scale_xy = scaleFactor
 			}
 		}
@@ -1434,7 +1434,13 @@ tree={
 	up(e){
 		
 		const id=e.data.identifier
-		this.touches[id]=0
+		
+		delete this.touches[id]
+
+		// reset pinch when fingers change
+		if (Object.keys(this.touches).length < 2) {
+			this.initialPinchDist = null
+		}
 		
 		drag=0
 		this.start_y=0
