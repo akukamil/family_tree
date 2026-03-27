@@ -1382,10 +1382,10 @@ tree={
 
 		const mx=e.data.global.x/app.stage.scale.x
 		const my=e.data.global.y/app.stage.scale.y
-		const id_orig=e.data.originalEvent.changedTouches[0].identifier
+		//const id_orig=e.data.originalEvent.changedTouches[0].identifier
 		const id=e.data.identifier
-		console.log('down',mx,{id},{id_orig})
-		if(!this.touches_num)
+		//console.log('down',mx,{id},{id_orig})
+		if(!Object.keys(this.touches).length)
 			drag=0
 		
 		
