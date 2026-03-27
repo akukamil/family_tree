@@ -1014,6 +1014,8 @@ tree={
 	graph:{},
 	touches:{},
 	initialPinchDist:null,
+	start_scale:0,
+	start_center:0,
 	
 	make_rel_graph(tar_id=0) {
 		
@@ -1358,6 +1360,14 @@ tree={
 
 	},
 	
+	mid_point(v1,v2){
+		
+		const x=(v1.x+v2.x)*0.5
+		const y=(v1.y+v2.y)*0.5
+		return {x,y}
+		
+	},
+	
 	down(e){
 
 		need_render=1
@@ -1379,8 +1389,11 @@ tree={
 			const pts = Object.values(this.touches)			
 			const d=this.vec_dist(this.touches[0].start,this.touches[1].start)
 			this.initialPinchDist = d
-			console.log(this.touches)
-			console.log({initialPinchDist:d})
+			
+			this.start_scale=objects.cards_cont.scale_xy
+			
+			this.start_center=this.mid_point(this.touches[0].start,this.touches[1].start)
+
 		}
 		
 	},
@@ -1409,15 +1422,18 @@ tree={
 		
 		// 🟢 PINCH ZOOM
 		if (touchList.length === 2) {
-			const curDist = this.vec_dist(
-				touchList[0].current,
-				touchList[1].current
-			)
-
-			if (this.initialPinchDist !== null) {
-				const scaleFactor = curDist / this.initialPinchDist
-				objects.cards_cont.scale_xy = scaleFactor
-			}
+			
+			
+			const curDist = this.vec_dist(touchList[0].current,touchList[1].current)
+			const scaleFactor = curDist / this.initialPinchDist
+			const newScale = this.start_scale * scaleFactor
+			objects.cards_cont.scale_xy = newScale
+			
+			const curCenter = this.mid_point(touchList[0].current,touchList[1].current)
+			const dx = curCenter.x - this.start_center.x
+			const dy = curCenter.y - this.start_center.y
+			objects.cards_cont.x=this.start_center.x+dx
+			objects.cards_cont.y=this.start_center.y+dx
 		}
 
 		// 🟢 DRAG
