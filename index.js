@@ -1376,25 +1376,24 @@ tree={
 		
 	},
 	
-	down(e){
+	down(t){
 
 		need_render=1
-		
 
-	
-		const id=e.data.identifier
-		const mx=e.data.global.x/app.stage.scale.x
-		const my=e.data.global.y/app.stage.scale.y
-		//console.log('down',{id})
+
+		const mx=t.globalX/app.stage.scale.x
+		const my=t.globalY/app.stage.scale.y
+		const id=t.identifier
+		console.log('down',mx,{id})
+		if(!this.touches_num)
+			drag=0
 		
 		this.touches_num++
 		
 		// 🚫 Ignore if already 2 touches active
 		if (Object.keys(this.touches).length >= 2) {
 			return
-		}		
-		
-		
+		}
 		
 		this.touches[id] = {
 			start:{x:mx,y:my},
@@ -1424,18 +1423,20 @@ tree={
 		
 	},
 	
-	move(e){
+	move(t){
 		
-		const id=e.data.identifier
-		//console.log('move',{id})
+		if(t.pointerType!=='touch') return
+		
+		const mx=t.globalX/app.stage.scale.x
+		const my=t.globalY/app.stage.scale.y
+		const id=t.identifier
+		//console.log('move',mx,{id})
 		//if (!this.start_y) return
 		if (!this.touches[id]) return
 		
 		need_render=1
 		drag++
 		
-		const my=e.data.global.y/app.stage.scale.y
-		const mx=e.data.global.x/app.stage.scale.x
 
 		// update touch state
 		this.touches[id].prev.x=this.touches[id].current.x
@@ -1495,9 +1496,11 @@ tree={
 		
 	},
 	
-	up(e){
+	up(t){
 		
-		const id=e.data.identifier
+		const mx=t.globalX/app.stage.scale.x
+		const my=t.globalY/app.stage.scale.y
+		const id=t.identifier
 		console.log('up',{id})
 		delete this.touches[id]
 		
@@ -1516,7 +1519,7 @@ tree={
 			this.initialPinchDist = null
 		}
 		
-		drag=0
+		//drag=0
 		this.start_y=0
 		
 	},
@@ -3380,6 +3383,22 @@ async function init_game_env(lang) {
 	});
 	window.addEventListener('keydown', function(e) { keyboard.keydown(e.key)});
 
+
+	c.addEventListener("touchstart", function(e){		
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			tree.down(e.changedTouches[i])
+		}
+	});
+	c.addEventListener("touchend", function(e){
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			tree.up(e.changedTouches[i])
+		}
+	});
+	c.addEventListener("touchmove", function(e){
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			tree.move(e.changedTouches[i])
+		}
+	});
 
 	//загружаем дерево
 	try{
