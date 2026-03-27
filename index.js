@@ -1012,7 +1012,8 @@ tree={
 	cur_tar_id:0,
 	update_on:0,
 	graph:{},
-	touches:[0,0],
+	touches:{},
+	initialPinchDist:null,
 	
 	make_rel_graph(tar_id=0) {
 		
@@ -1349,6 +1350,14 @@ tree={
 		
 	},
 	
+	vec_dist(v1,v2){
+
+		const dx=v1.x-v2.x
+		const dy=v1.y-v2.y
+		return Math.sqrt(dx*dx+dy*dy)
+
+	},
+	
 	down(e){
 
 		need_render=1
@@ -1356,58 +1365,82 @@ tree={
 		const id=e.data.identifier
 		const mx=e.data.global.x/app.stage.scale.x
 		const my=e.data.global.y/app.stage.scale.y
+		
+		this.touches[id] = {
+			start:{x:mx,y:my},
+			prev:{x:mx,y:my},
+			current:{x:mx,y:my}
+		}
 
-		this.touches[id]={sx:mx,sy:my,x:mx,y:my}
-		this.start_y=e.data.global.y/app.stage.scale.y
-		this.start_x=e.data.global.x/app.stage.scale.x
-		this.start_y_cont=objects.cards_cont.y
-		this.start_x_cont=objects.cards_cont.x
+		// if second finger added → initialize pinch
+		if (Object.keys(this.touches).length === 2) {
+			const pts = Object.values(touches)			
+			const d=this.vec_dist(touches[0].start,touches[1].start)
+			this.initialPinchDist = d
+		}
 		
 	},
+
 	
 	move(e){
 		
+		const id=e.data.identifier
 		
-		if (!this.start_y) return
-		if (!this.touches[0])return
-		if (!this.touches[1])return
+		//if (!this.start_y) return
+		if (!this.touches[id]) return
 		
 		need_render=1
 		drag++
 		
-		const id=e.data.identifier
-		const cur_touch=this.touches[id]
 		const my=e.data.global.y/app.stage.scale.y
 		const mx=e.data.global.x/app.stage.scale.x
-		cur_touch.x=mx
-		cur_touch.y=my
+
+		// update touch state
+		this.touches[id].prev.x=this.touches[id].current.x
+		this.touches[id].prev.y=this.touches[id].current.y
+		this.touches[id].current.x=mx
+		this.touches[id].current.y=my
+
+		const touchList = Object.values(this.touches)
 		
-		//начальный отрезок между пальцами
-		const sx1=this.touches[0].sx
-		const sy1=this.touches[0].sy
-		const sx2=this.touches[1].sx
-		const sy2=this.touches[1].sy
-		let dx=sx2-sx1
-		let dy=sy2-sy1
-		const init_dist=Math.sqrt(dx*dx+dy*dy)
-		
-		
-		//текущий отрезок между пальцами
-		const cx1=this.touches[0].x
-		const cy1=this.touches[0].y
-		const cx2=this.touches[1].x
-		const cy2=this.touches[1].y
-		dx=cx2-cx1
-		dy=cy2-cy1
-		const cur_dist=Math.sqrt(dx*dx+dy*dy)
-		
-		
-		const scale_factor=cur_dist/init_dist
-		
-		objects.cards_cont.scale_xy=scale_factor
+		// 🟢 PINCH ZOOM
+		if (touchList.length === 2) {
+			const curDist = this.vec_dist(
+				touchList[0].current,
+				touchList[1].current
+			)
+
+			if (this.initialPinchDist !== null) {
+				const scaleFactor = curDist / initialPinchDist
+				objects.cards_cont.scale_xy = scaleFactor
+			}
+		}
+
+		// 🟢 DRAG
+		if (touchList.length === 1) {
+			const t = touchList[0]
+
+			const d_vec = {
+				x: t.current.x - t.prev.x,
+				y: t.current.y - t.prev.y
+			}
+
+			objects.cards_cont.x += d_vec.x
+			objects.cards_cont.y += d_vec.y
+		}		
 		
 	},
+	
+	up(e){
 		
+		const id=e.data.identifier
+		this.touches[id]=0
+		
+		drag=0
+		this.start_y=0
+		
+	},
+			
 	save(){		
 		
 		//return
@@ -1545,16 +1578,7 @@ tree={
 		}
 	},
 
-	up(e){
-		
-		const id=e.data.identifier
-		this.touches[id]=0
-		
-		drag=0
-		this.start_y=0
-		
-	}	
-	
+
 }
 
 controls={
