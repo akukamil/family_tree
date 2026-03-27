@@ -1379,6 +1379,7 @@ tree={
 			const pts = Object.values(this.touches)			
 			const d=this.vec_dist(this.touches[0].start,this.touches[1].start)
 			this.initialPinchDist = d
+			console.log(this.touches)
 			console.log({initialPinchDist:d})
 		}
 		
