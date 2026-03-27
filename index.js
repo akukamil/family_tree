@@ -1376,21 +1376,20 @@ tree={
 		
 	},
 	
-	down(t){
-
+	down(e){
+				
 		need_render=1
 
-
-		const mx=t.globalX/app.stage.scale.x
-		const my=t.globalY/app.stage.scale.y
-		const id=t.identifier
-		console.log('down',mx,{id})
+		const mx=e.data.global.x/app.stage.scale.x
+		const my=e.data.global.y/app.stage.scale.y
+		const id_orig=e.data.originalEvent.changedTouches[0].identifier
+		const id=e.data.identifier
+		console.log('down',mx,{id},{id_orig})
 		if(!this.touches_num)
 			drag=0
 		
-		this.touches_num++
 		
-		// 🚫 Ignore if already 2 touches active
+		//Ignore if already 2 touches active
 		if (Object.keys(this.touches).length >= 2) {
 			return
 		}
@@ -1423,13 +1422,13 @@ tree={
 		
 	},
 	
-	move(t){
+	move(e){
 		
-		if(t.pointerType!=='touch') return
+		const mx=e.data.global.x/app.stage.scale.x
+		const my=e.data.global.y/app.stage.scale.y
 		
-		const mx=t.globalX/app.stage.scale.x
-		const my=t.globalY/app.stage.scale.y
-		const id=t.identifier
+		//const id_orig=e.data.originalEvent.changedTouches[0].identifier
+		const id=e.data.identifier
 		//console.log('move',mx,{id})
 		//if (!this.start_y) return
 		if (!this.touches[id]) return
@@ -1447,8 +1446,7 @@ tree={
 		const touchList = Object.values(this.touches)
 		
 		// 🟢 PINCH ZOOM
-		if (touchList.length === 2) {
-			
+		if (touchList.length===2) {			
 			
 			const curDist = this.vec_dist(touchList[0].current,touchList[1].current)
 			const scaleFactor = curDist / this.initialPinchDist
@@ -1485,27 +1483,24 @@ tree={
 
 			objects.cards_cont.x += d_vec.x
 			objects.cards_cont.y += d_vec.y
-			if (objects.cards_cont.x>0)
-				objects.cards_cont.x=0
 			
-			if (objects.cards_cont.y>0)
-				objects.cards_cont.y=0
+			if (objects.cards_cont.x>0)	objects.cards_cont.x=0			
+			if (objects.cards_cont.y>0)	objects.cards_cont.y=0
 			
 			drag++
 		}		
 		
 	},
 	
-	up(t){
+	up(e){
 		
-		const mx=t.globalX/app.stage.scale.x
-		const my=t.globalY/app.stage.scale.y
-		const id=t.identifier
-		console.log('up',{id})
+		const mx=e.data.global.x/app.stage.scale.x
+		const my=e.data.global.y/app.stage.scale.y
+		//const id_orig=e.data.originalEvent.changedTouches[0].identifier
+		const id=e.data.identifier
+		//console.log('up',{id})
 		delete this.touches[id]
-		
-		this.touches_num--
-		
+			
 		
 		const obj_touches_num=Object.keys(this.touches).length
 		if (this.touches_num!==obj_touches_num){
@@ -3339,7 +3334,7 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	//my_data.uid='vk39099558'
+	my_data.uid='vk39099558'
 	//my_data.uid='gdht42'
 	
 	await main_loader.load1()
@@ -3383,7 +3378,7 @@ async function init_game_env(lang) {
 	});
 	window.addEventListener('keydown', function(e) { keyboard.keydown(e.key)});
 
-
+/*
 	c.addEventListener("touchstart", function(e){		
 		for (let i = 0; i < e.changedTouches.length; i++) {
 			tree.down(e.changedTouches[i])
@@ -3399,6 +3394,7 @@ async function init_game_env(lang) {
 			tree.move(e.changedTouches[i])
 		}
 	});
+*/
 
 	//загружаем дерево
 	try{
