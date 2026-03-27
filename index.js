@@ -1372,11 +1372,14 @@ tree={
 			current:{x:mx,y:my}
 		}
 
+		console.log({id,mx,my})
+	
 		// if second finger added → initialize pinch
 		if (Object.keys(this.touches).length === 2) {
 			const pts = Object.values(this.touches)			
 			const d=this.vec_dist(this.touches[0].start,this.touches[1].start)
 			this.initialPinchDist = d
+			console.log({initialPinchDist:d})
 		}
 		
 	},
