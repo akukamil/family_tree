@@ -1019,7 +1019,8 @@ tree={
 	update_on:0,
 	graph:{},
 	cont_start_pos:{x:0,y:0},
-	touches:[],
+	touches:{},
+	touches_num:0,
 	initialPinchDist:null,
 	start_scale:0,
 	start_center:0,
@@ -1379,10 +1380,22 @@ tree={
 
 		need_render=1
 		
+
+	
 		const id=e.data.identifier
 		const mx=e.data.global.x/app.stage.scale.x
 		const my=e.data.global.y/app.stage.scale.y
-		//console.log({id})
+		//console.log('down',{id})
+		
+		this.touches_num++
+		
+		// 🚫 Ignore if already 2 touches active
+		if (Object.keys(this.touches).length >= 2) {
+			return
+		}		
+		
+		
+		
 		this.touches[id] = {
 			start:{x:mx,y:my},
 			prev:{x:mx,y:my},
@@ -1393,10 +1406,11 @@ tree={
 		//console.log({id,mx,my})
 	
 		// if second finger added → initialize pinch
-		if (Object.keys(this.touches).length === 2) {
+		const touch_ids=Object.keys(this.touches)
+		if (touch_ids.length === 2) {
 
 			//console.log(this.touches.map(v=>v.id))
-			const d=this.vec_dist(this.touches[0].current,this.touches[1].current)
+			const d=this.vec_dist(this.touches[touch_ids[0]].current,this.touches[touch_ids[1]].current)
 			this.initialPinchDist = d
 			
 			this.start_scale=objects.cards_cont.scale_xy
@@ -1404,7 +1418,7 @@ tree={
 			this.cont_start_pos.x=objects.cards_cont.x
 			this.cont_start_pos.y=objects.cards_cont.y
 			
-			this.start_center=this.mid_point(this.touches[0].current,this.touches[1].current)
+			this.start_center=this.mid_point(this.touches[touch_ids[0]].current,this.touches[touch_ids[1]].current)
 
 		}
 		
@@ -1413,7 +1427,7 @@ tree={
 	move(e){
 		
 		const id=e.data.identifier
-		//console.log({id})
+		//console.log('move',{id})
 		//if (!this.start_y) return
 		if (!this.touches[id]) return
 		
@@ -1455,6 +1469,8 @@ tree={
 			
 			if (objects.cards_cont.y>0)
 				objects.cards_cont.y=0
+			
+			drag++
 		}
 
 		// 🟢 DRAG
@@ -1473,6 +1489,8 @@ tree={
 			
 			if (objects.cards_cont.y>0)
 				objects.cards_cont.y=0
+			
+			drag++
 		}		
 		
 	},
@@ -1480,9 +1498,19 @@ tree={
 	up(e){
 		
 		const id=e.data.identifier
-		
+		console.log('up',{id})
 		delete this.touches[id]
-
+		
+		this.touches_num--
+		
+		
+		const obj_touches_num=Object.keys(this.touches).length
+		if (this.touches_num!==obj_touches_num){
+			this.touches_num=0
+			this.touches={}
+			this.initialPinchDist = null
+		}
+		
 		// reset pinch when fingers change
 		if (Object.keys(this.touches).length < 2) {
 			this.initialPinchDist = null
