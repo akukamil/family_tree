@@ -638,7 +638,7 @@ class new_person_card_class extends PIXI.Container{
 		this.align(params.align||'right')
 
 		this.addChild(this.bcg,this.frame,this.name_t,this.age_t,this.rel_t)
-		this.addChild(this.id_t)
+		//this.addChild(this.id_t)
 		if (this.quick_menu) this.addChild(this.quick_menu)
 		
 	}
@@ -1457,7 +1457,7 @@ tree={
 			const scaleFactor = curDist / this.initialPinchDist
 			let newScale = this.start_scale * scaleFactor
 			if (newScale>2) newScale=2
-			if (newScale<0.5) newScale=0.5
+			if (newScale<0.7) newScale=0.7
 			objects.cards_cont.scale_xy = newScale
 			
 			const curCenter = this.mid_point(touchList[0].current,touchList[1].current)
