@@ -1386,9 +1386,8 @@ tree={
 
 		const mx=e.data.global.x/app.stage.scale.x
 		const my=e.data.global.y/app.stage.scale.y
-		const id_orig=e.data.originalEvent.changedTouches[0].identifier
 		const id=e.data.identifier
-		console.log('down',mx,{id},{id_orig})
+		console.log('down',mx,{id})
 		
 		
 		const num_of_touches=Object.keys(this.touches).length
