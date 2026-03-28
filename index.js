@@ -749,7 +749,7 @@ class new_person_card_class extends PIXI.Container{
 		objects.cards_cont.y=0
 		objects.cards_cont.x=0
 		cur_root_id=this.id				
-		tree.show_root_person(this.id,1)	
+		tree.show_root_person(({person_id:this.id,auto_fold:1}))	
 
 	}
 	
@@ -758,7 +758,7 @@ class new_person_card_class extends PIXI.Container{
 		this.fold=1-this.fold		
 		familyData[this.id].fold=this.fold
 		
-		tree.show_root_person(cur_root_id,0)
+		tree.show_root_person({person_id:cur_root_id,auto_fold:0})
 	}
 		
 	empty_photo(){		
@@ -1135,7 +1135,7 @@ tree={
 		
 
 		tree.save()
-		show_root_person(cur_root_id)
+		show_root_person(({person_id:cur_root_id}))
 	},
 	
 	change_auto_fold_lev(d){
@@ -1152,7 +1152,7 @@ tree={
 			pdata.fold=0
 		}
 		
-		this.show_root_person(cur_root_id,1)		
+		this.show_root_person({person_id:cur_root_id,auto_fold:1,cont_y:0,cont_x:0})
 		
 	},
 	
@@ -1224,18 +1224,22 @@ tree={
 
 	},
 
-	show_root_person(person_id,auto_fold){
+	show_root_person(params={}){
 		
-		this.auto_fold=auto_fold
 		
-		objects.cards_cont.visible=true
-		objects.cards_cont.y=0
+		const person_id=params.person_id||0
+		this.auto_fold=params.auto_fold||0
+		
+		if (params.cont_y!==undefined) objects.cards_cont.y=params.cont_y
+		if (params.cont_x!==undefined) objects.cards_cont.x=params.cont_x
+		
+		objects.cards_cont.visible=true	
 		objects.controls_cont.visible=true
 		objects.controls_fold_t.text=this.fold_lev
 		
 		objects.cards_pool.find(c=>c.visible=false)
 		
-		
+		//складываем все карточки
 		if (this.auto_fold){
 			for (const ind of Object.keys(familyData)){
 				const pdata=familyData[ind]
@@ -1258,7 +1262,7 @@ tree={
 		objects.cards_lines.lineTo(1000,145)
 		
 		total_y=150	
-		this.show_person_rec(person_id,0,auto_fold)
+		this.show_person_rec(person_id,0,0)
 	},
 
 	show_person_rec(person_id,x,lev){
@@ -1382,15 +1386,17 @@ tree={
 
 		const mx=e.data.global.x/app.stage.scale.x
 		const my=e.data.global.y/app.stage.scale.y
-		//const id_orig=e.data.originalEvent.changedTouches[0].identifier
+		const id_orig=e.data.originalEvent.changedTouches[0].identifier
 		const id=e.data.identifier
-		//console.log('down',mx,{id},{id_orig})
-		if(!Object.keys(this.touches).length)
-			drag=0
+		console.log('down',mx,{id},{id_orig})
 		
+		
+		const num_of_touches=Object.keys(this.touches).length
+		
+	
 		
 		//Ignore if already 2 touches active
-		if (Object.keys(this.touches).length >= 2) {
+		if (num_of_touches >= 2) {
 			return
 		}
 		
@@ -1450,26 +1456,21 @@ tree={
 			
 			const curDist = this.vec_dist(touchList[0].current,touchList[1].current)
 			const scaleFactor = curDist / this.initialPinchDist
-			const newScale = this.start_scale * scaleFactor
+			let newScale = this.start_scale * scaleFactor
+			if (newScale>2) newScale=2
+			if (newScale<0.5) newScale=0.5
 			objects.cards_cont.scale_xy = newScale
-			//console.log(curDist,this.initialPinchDist)
 			
 			const curCenter = this.mid_point(touchList[0].current,touchList[1].current)
 			const dx = curCenter.x - this.start_center.x
 			const dy = curCenter.y - this.start_center.y
-			//objects.cards_cont.x=this.cont_start_pos.x+dx
-			//objects.cards_cont.y=this.cont_start_pos.y+dy
 			const scaleChange = newScale / this.start_scale
+			
 			objects.cards_cont.x = curCenter.x - (this.start_center.x - this.cont_start_pos.x) * scaleChange
 			objects.cards_cont.y = curCenter.y - (this.start_center.y - this.cont_start_pos.y) * scaleChange
 		
-			if (objects.cards_cont.x>0)
-				objects.cards_cont.x=0
-			
-			if (objects.cards_cont.y>0)
-				objects.cards_cont.y=0
-			
-			drag++
+			if (objects.cards_cont.x>0)	objects.cards_cont.x=0			
+			if (objects.cards_cont.y>0)	objects.cards_cont.y=0
 		}
 
 		// 🟢 DRAG
@@ -1486,8 +1487,7 @@ tree={
 			
 			if (objects.cards_cont.x>0)	objects.cards_cont.x=0			
 			if (objects.cards_cont.y>0)	objects.cards_cont.y=0
-			
-			drag++
+
 		}		
 		
 	},
@@ -1498,23 +1498,19 @@ tree={
 		const my=e.data.global.y/app.stage.scale.y
 		//const id_orig=e.data.originalEvent.changedTouches[0].identifier
 		const id=e.data.identifier
-		//console.log('up',{id})
+		console.log('up',{id},{drag})
 		delete this.touches[id]
 			
 		
-		const obj_touches_num=Object.keys(this.touches).length
-		if (this.touches_num!==obj_touches_num){
-			this.touches_num=0
-			this.touches={}
-			this.initialPinchDist = null
-		}
+		const num_of_touches=Object.keys(this.touches).length
 		
 		// reset pinch when fingers change
-		if (Object.keys(this.touches).length < 2) {
-			this.initialPinchDist = null
+		if (num_of_touches < 2) this.initialPinchDist = null
+		if (num_of_touches===0)	{
+			console.log('up drag=0')
+			drag=0
 		}
 		
-		//drag=0
 		this.start_y=0
 		
 	},
@@ -1885,7 +1881,7 @@ rel={
 	
 	up(){
 		
-		drag=0
+		//drag=0
 		this.start_y=0
 		
 	}
@@ -2003,7 +1999,7 @@ pl={
 			this.resolver(this.selected_person_id)
 		}else{
 			cur_root_id=this.selected_person_id
-			tree.show_root_person(cur_root_id,1)			
+			tree.show_root_person({person_id:cur_root_id,auto_fold:1})	
 		}		
 		this.close()
 	},
@@ -2301,7 +2297,7 @@ add_dlg={
 		}
 		
 		cur_root_id=this.id
-		tree.show_root_person(this.id,1)
+		tree.show_root_person({person_id:this.id,auto_fold:1})
 		
 	},
 	
@@ -2347,7 +2343,7 @@ add_dlg={
 		}
 		
 		tree.save()
-		tree.show_root_person(cur_root_id,0)
+		tree.show_root_person({person_id:cur_root_id})
 		console.log(person_id)
 	},
 	
@@ -2482,7 +2478,7 @@ add_dlg={
 			delete familyData[this.id].empty
 		
 		tree.make_rel_graph()
-		tree.show_root_person(cur_root_id,0)
+		tree.show_root_person({person_id:cur_root_id})
 		if (this.updated) tree.save()
 		this.close()
 		
@@ -3306,7 +3302,7 @@ async function init_game_env(lang) {
 				
 	git_src=""
 	
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(1,168,246,1)}</style>';
+	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(70,70,70,1)}</style>';
 	const dw=M_WIDTH/document.body.clientWidth;
 	const dh=M_HEIGHT/document.body.clientHeight;
 	const resolution=Math.min(1.5,window.devicePixelRatio );	
@@ -3334,7 +3330,7 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	//my_data.uid='vk39099558'
+	my_data.uid='vk39099558'
 	//my_data.uid='gdht42'
 	
 	await main_loader.load1()
