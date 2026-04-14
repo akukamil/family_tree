@@ -612,7 +612,7 @@ class new_person_card_class extends PIXI.Container{
 		this.frame.width=270
 		this.frame.height=80
 		
-		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 17,align: 'center'})
+		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 17,align: 'center'})
 		this.name_t.tint=0xffffff		
 		this.name_t.y=params.name_y||22
 		
@@ -646,15 +646,15 @@ class new_person_card_class extends PIXI.Container{
 
 		}
 		
-		this.rel_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 18})
+		this.rel_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 18})
 		this.rel_t.y=params.rel_t_y||57
 		this.rel_t.tint=0x00ffff
 
-		this.age_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 18})
+		this.age_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 18})
 		this.age_t.y=params.age_t_y||40
 		this.age_t.tint=0xF8CBAD
 		
-		this.id_t=new PIXI.BitmapText('0', {fontName: 'mfont',fontSize: 18,align: 'center'})
+		this.id_t=new PIXI.BitmapText('0', {fontName: 'mfont48',fontSize: 18,align: 'center'})
 		this.id_t.anchor.set(0.5,0.5)
 		this.id_t.x=15
 		this.id_t.y=15
@@ -947,17 +947,17 @@ class dr_card_class extends PIXI.Container{
 		this.photo=new PIXI.Graphics()
 		this.photo.x=20
 
-		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'})
+		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 25,align: 'center'})
 		this.name_t.tint=0xffffff	
 		this.name_t.y=5
 		this.name_t.x=90
 				
-		this.bd_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25})
+		this.bd_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 25})
 		this.bd_t.y=30
 		this.bd_t.x=90
 		this.bd_t.tint=0xaaaaaa
 		
-		this.dr_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align:'center',lineSpacing:25})
+		this.dr_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 25,align:'center',lineSpacing:35})
 		this.dr_t.y=30
 		this.dr_t.x=350
 		this.dr_t.anchor.set(0.5,0.5)
@@ -3383,6 +3383,7 @@ main_loader={
 					
 		loader.add("m2_font", git_src+"fonts/CoreSansDS57CnBold32/font.fnt")		
 		loader.add("m1_font", git_src+"fonts/CoreSansDS57CnBold64/font.fnt")		
+		loader.add("m_font48", git_src+"fonts/CoreSansDS57CnBold48/font.fnt")		
 			
 		const load_list=eval(assets.main_load_list);
 		for (var i = 0; i < load_list.length; i++)
@@ -3566,7 +3567,7 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	//my_data.uid='vk39099558'
+	my_data.uid='vk39099558'
 	//my_data.uid='gdht42'
 	
 	await main_loader.load1()
