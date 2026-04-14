@@ -612,7 +612,7 @@ class new_person_card_class extends PIXI.Container{
 		this.frame.width=270
 		this.frame.height=80
 		
-		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 17,align: 'center'})
+		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 19,align: 'center'})
 		this.name_t.tint=0xEFEBDE		
 		this.name_t.y=params.name_y||22
 		
@@ -646,11 +646,11 @@ class new_person_card_class extends PIXI.Container{
 
 		}
 		
-		this.rel_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 18})
+		this.rel_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 20})
 		this.rel_t.y=params.rel_t_y||57
 		this.rel_t.tint=0x59CEC9
 
-		this.age_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 18})
+		this.age_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 20})
 		this.age_t.y=params.age_t_y||40
 		this.age_t.tint=0xEFC7A4
 		
