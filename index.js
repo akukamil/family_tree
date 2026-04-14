@@ -7,6 +7,7 @@ let cur_root_id=0
 let s3
 let drag=0
 let need_render=1
+const qm_rt={}
 
 irnd = function(min,max) {
 	min = Math.ceil(min);
@@ -564,7 +565,7 @@ auth2={
 }
 
 class new_person_card_class extends PIXI.Container{
-	
+
 	constructor(params={}){
 		
 		super()
@@ -574,58 +575,83 @@ class new_person_card_class extends PIXI.Container{
 		this.fold=0
 		this.type=''
 		this.rel_dist=0
+		this.wait_for_up=0
 		
 		const t=this
 		
-		this.bcg=new PIXI.Graphics()
-		this.bcg.clear()
-		this.bcg.beginFill(0x333355)
-		this.bcg.drawRoundedRect(0,0,60,60,13)
-		this.bcg.endFill()
-		this.bcg.x=5
-		this.bcg.y=5
-		this.bcg.interactive=params.interactive||false
+		if (params.bcg){
+			this.bcg=new PIXI.Sprite(assets.card_bcg_short2)
+			this.bcg.width=270
+			this.bcg.height=80			
+		}
+
 		
-		this.bcg.pointerup=function(e){
+		this.photo=new PIXI.Graphics()
+		this.photo.clear()
+		this.photo.beginFill(0x333355)
+		this.photo.drawRoundedRect(0,0,60,60,15)
+		this.photo.endFill()
+		this.photo.x=10
+		this.photo.y=10
+		this.photo.interactive=params.interactive||false
+		
+		this.photo.pointerup=function(e){
+			if(!t.wait_for_up){
+				t.wait_for_up=0
+				return
+			}
 			add_dlg.activate(t,'edit')
 			tree.up(e)
 		}
-		this.bcg.pointerdown=function(e){
+		this.photo.pointerdown=function(e){
+			t.wait_for_up=1
 			tree.down(e)
 		}
 		
 		this.frame=new PIXI.Sprite(assets.card_frame)
-		this.frame.width=70
-		this.frame.height=70
+		this.frame.width=270
+		this.frame.height=80
 		
-		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 18,align: 'center'})
+		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 17,align: 'center'})
 		this.name_t.tint=0xffffff		
-		this.name_t.y=params.name_y||16
+		this.name_t.y=params.name_y||22
 		
 		if (params.quick_menu){
 			
 			
-			this.quick_menu=new PIXI.Sprite(assets.card_menu_icon)
-			this.quick_menu.width=200
-			this.quick_menu.height=60
-			this.quick_menu.x=135
-			this.quick_menu.y=15
+			this.quick_menu=new PIXI.Sprite()
+			this.quick_menu.x=142
+			this.quick_menu.y=25
+			//this.quick_menu.anchor.set(1,1)
+			this.quick_menu.width=150*0.8
+			this.quick_menu.height=60*0.8
 			this.quick_menu.interactive=true
-			this.quick_menu.pointerup=function(e){
-				t.quick_menu_down(e)
-				tree.up(e)
-			}
+			
 			this.quick_menu.pointerdown=function(e){
+				t.wait_for_up=1
 				tree.down(e)
-			}	
+			}				
+			
+			this.quick_menu.pointerup=function(e){
+							
+				if(!t.wait_for_up){
+					t.wait_for_up=0
+					tree.up(e)	
+					return
+				}
+				t.quick_menu_down(e)
+				tree.up(e)	
+
+			}
+
 		}
 		
 		this.rel_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 18})
-		this.rel_t.y=params.rel_t_y||55
+		this.rel_t.y=params.rel_t_y||57
 		this.rel_t.tint=0x00ffff
 
 		this.age_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 18})
-		this.age_t.y=params.age_t_y||37
+		this.age_t.y=params.age_t_y||40
 		this.age_t.tint=0xF8CBAD
 		
 		this.id_t=new PIXI.BitmapText('0', {fontName: 'mfont',fontSize: 18,align: 'center'})
@@ -637,16 +663,18 @@ class new_person_card_class extends PIXI.Container{
 		this.visible=false
 		this.align(params.align||'right')
 
-		this.addChild(this.bcg,this.frame,this.name_t,this.age_t,this.rel_t)
+		if (params.bcg) this.addChild(this.bcg)
+
+		this.addChild(this.photo,this.name_t,this.age_t,this.rel_t)
 		//this.addChild(this.id_t)
 		if (this.quick_menu) this.addChild(this.quick_menu)
 		
 	}
-	
+
 	init(type){
 		
 		if(type==='rel'){
-			this.bcg.interactive=true
+			this.photo.interactive=true
 			this.visible=true
 			this.empty_photo()
 			this.id=-1
@@ -654,12 +682,12 @@ class new_person_card_class extends PIXI.Container{
 			//this.bcg.pointerup=(e)=>{
 			//	//rel.card_down(t)
 			//}
-			this.bcg.pointerdown=(e)=>{
+			this.photo.pointerdown=(e)=>{
 				rel.card_down(t)
 			}
 		}		
 	}
-	
+
 	align(dir){
 		
 		if (dir==='left'){
@@ -678,18 +706,18 @@ class new_person_card_class extends PIXI.Container{
 		if (dir==='right'){
 			
 			this.name_t.anchor.set(0,0.5)
-			this.name_t.x=70
+			this.name_t.x=75
 				
 			this.age_t.anchor.set(0,0.5)
-			this.age_t.x=70
+			this.age_t.x=75
 				
 			this.rel_t.anchor.set(0,0.5)
-			this.rel_t.x=70
+			this.rel_t.x=75
 			
 		}
 		
 	}
-	
+
 	quick_menu_down(e){
 		
 		need_render=1
@@ -700,7 +728,7 @@ class new_person_card_class extends PIXI.Container{
 		
 		const quick_menu_scr_x=(this.quick_menu.x+this.x)*objects.cards_cont.scale_xy+objects.cards_cont.x
 		const quick_menu_scr_w=this.quick_menu.width*objects.cards_cont.scale_xy
-		const quick_menu_cell_w=quick_menu_scr_w/4
+		const quick_menu_cell_w=quick_menu_scr_w/3
 		
 		const mx_in_quick_menu=mx-quick_menu_scr_x
 		const btn_id=Math.floor(mx_in_quick_menu/quick_menu_cell_w)
@@ -708,13 +736,12 @@ class new_person_card_class extends PIXI.Container{
 		if (btn_id===0)
 			this.show_tree()
 		if (btn_id===1)
-			add_dlg.activate(this,'add_spouse')
+			add_dlg.activate(this,this.type==='spouse'?'add_child':'add_spouse')
 		if (btn_id===2)
-			add_dlg.activate(this,'add_child')
-		if (btn_id===3)
 			this.fold_node()
+
 	}
-	
+
 	update_photo(t){
 		
 		let texture=t||photo_loader.cache[this.id]
@@ -725,20 +752,22 @@ class new_person_card_class extends PIXI.Container{
 			texture=assets.nophoto
 		}
 
+		const PHOTO_SIZE=60
 		const tw = texture.width
 		const th = texture.height
-		const scaleX = 60 / tw
-		const scaleY = 60 / th
+		const scaleX = PHOTO_SIZE / tw
+		const scaleY = PHOTO_SIZE / th
 		const matrix = new PIXI.Matrix()
 		matrix.scale(scaleX, scaleY)
 		
-		this.bcg.clear()
-		this.bcg.beginTextureFill({texture,matrix})
-		this.bcg.drawRoundedRect(0,0,60,60,10)
+		this.photo.clear()
+		this.photo.lineStyle({width:1.5,color:0xD9D9D9,cap:'round'})
+		this.photo.beginTextureFill({texture,matrix})
+		this.photo.drawRoundedRect(0,0,PHOTO_SIZE,PHOTO_SIZE,17)
 		need_render=1
 		
 	}	
-	
+
 	show_tree(){
 		
 		const f_data=familyData[this.id]
@@ -752,16 +781,16 @@ class new_person_card_class extends PIXI.Container{
 		tree.show_root_person(({person_id:this.id,auto_fold:1}))	
 
 	}
-	
-	fold_node(){				
+
+	fold_node(){
 		
 		this.fold=1-this.fold		
 		familyData[this.id].fold=this.fold
 		
 		tree.show_root_person({person_id:cur_root_id,auto_fold:0})
 	}
-		
-	empty_photo(){		
+
+	empty_photo(){
 		this.name_t.text=''
 		this.age_t.text=''
 		this.rel_t.text=''
@@ -769,10 +798,10 @@ class new_person_card_class extends PIXI.Container{
 		this.update_photo(assets.add_person_img)
 		
 	}
-				
-	fill_data(person_data, parents_card,as_spouse){
+
+	fill_data(person_data, type){
 		
-		this.bcg.alpha=1
+		this.photo.alpha=1
 		
 		this.id_t.text=person_data.id
 		this.age_t.text=person_data.bd
@@ -781,8 +810,20 @@ class new_person_card_class extends PIXI.Container{
 		const rel_with_sex=rel_no_sex?.[person_data.sex]
 		this.rel_t.text=rel_with_sex||''
 		this.quick_menu.interactive=true
-				
-		if (parents_card){
+		this.type=type
+		
+		
+		
+		const tw = assets.qm_kid.width
+		const th = assets.qm_kid.height
+		const scaleX = 60 / tw
+		const scaleY = 60 / th
+		
+		const matrix = new PIXI.Matrix()
+		matrix.scale(scaleX, scaleY)
+		
+		
+		if (type==='parent'){
 			
 			if (person_data.empty){
 				this.age_t.alpha=0.4
@@ -793,35 +834,51 @@ class new_person_card_class extends PIXI.Container{
 			}else{
 				this.age_t.alpha=1
 				this.name_t.set2(person_data.name,130)				
-				this.quick_menu.texture=assets.quick_menu_only_tree				
+				this.quick_menu.texture=qm_rt.qm_tree				
 			}
+			
+			this.bcg.texture=assets.card_bcg_short
 
 			return
 		}
 		
-		this.name_t.set2(person_data.name,130)
+		this.name_t.set2(person_data.name,130)		
 		
-		if (person_data.kids.length===0){
-			if(as_spouse){
-				this.quick_menu.texture=assets.quick_menu_icon_term
-				return
+		if (type==='spouse'){
+			
+			if (person_data.kids.length){
+				if (person_data.fold)
+					this.quick_menu.texture=qm_rt.qm_kid_f
+				else
+					this.quick_menu.texture=qm_rt.qm_kid	
+				this.bcg.texture=assets.card_bcg
 			}else{
-				if (person_data.spouses.length===0){
-					this.quick_menu.texture=assets.quick_menu_icon_term
-					return
-				}
-			}				
+				this.quick_menu.texture=qm_rt.qm_kid_nof
+				this.bcg.texture=assets.card_bcg_short
+			}			
+			
+			
 
-		}	
+		}
+		
+		if (type==='kid'){
+			if (person_data.spouses.length){
+				if (person_data.fold)
+					this.quick_menu.texture=qm_rt.qm_spouse_f
+				else
+					this.quick_menu.texture=qm_rt.qm_spouse	
+				this.bcg.texture=assets.card_bcg
+			}else{
+				this.quick_menu.texture=qm_rt.qm_spouse_nof
+				this.bcg.texture=assets.card_bcg_short
+			}
+			
 
-		if (person_data.fold)		
-			this.quick_menu.texture=assets.quick_menu_icon2
-		else
-			this.quick_menu.texture=assets.quick_menu_icon
+		}
 		
 		
 	}
-	
+
 	getFullYears(dateString) {
 		// Parse DD.MM.YYYY
 		const parts = dateString.split(".");
@@ -837,7 +894,7 @@ class new_person_card_class extends PIXI.Container{
 		}
 		return age;
 	}
-	
+
 	getYearString(age) {
 		const n = Math.abs(age) % 100;
 		const n1 = n % 10;
@@ -846,7 +903,7 @@ class new_person_card_class extends PIXI.Container{
 		if (n1 === 1) return "год";
 		return "лет";
 	}
-		
+
 	set(person_id){
 		
 		this.id=person_id
@@ -876,7 +933,126 @@ class new_person_card_class extends PIXI.Container{
 		if (!bd&&!dd) this.age_t.text=''
 		
 	}
+
+}
+
+class dr_card_class extends PIXI.Container{
+	
+	constructor(params={}){
 		
+		super()
+		
+		this.bcg=new PIXI.Sprite(assets.dr_card_bcg)
+		
+		this.photo=new PIXI.Graphics()
+		this.photo.x=20
+
+		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align: 'center'})
+		this.name_t.tint=0xffffff	
+		this.name_t.y=5
+		this.name_t.x=90
+				
+		this.bd_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25})
+		this.bd_t.y=30
+		this.bd_t.x=90
+		this.bd_t.tint=0xaaaaaa
+		
+		this.dr_t=new PIXI.BitmapText('', {fontName: 'mfont',fontSize: 25,align:'center',lineSpacing:25})
+		this.dr_t.y=30
+		this.dr_t.x=350
+		this.dr_t.anchor.set(0.5,0.5)
+		this.dr_t.tint=0xdddd11
+		
+		
+		this.addChild(this.bcg,this.photo,this.name_t,this.bd_t,this.dr_t)
+		
+	}
+	
+	getYearString(age) {
+		const n = Math.abs(age) % 100;
+		const n1 = n % 10;
+		if (n > 10 && n < 20) return "лет";
+		if (n1 > 1 && n1 < 5) return "года";
+		if (n1 === 1) return "год";
+		return "лет";
+	}
+
+	getFullYears(dateString) {
+		// Parse DD.MM.YYYY
+		const parts = dateString.split(".");
+		const birthDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+		const today = new Date();
+
+		let age = today.getFullYear() - birthDate.getFullYear();
+		const monthDiff = today.getMonth() - birthDate.getMonth();
+
+		// Adjust if birthday hasn't occurred yet this year
+		if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+		age--;
+		}
+		return age;
+	}
+	
+	update_photo(t){
+		
+		let texture=t||photo_loader.cache[this.id]
+		
+		//если нет текстуры то добавляем в загрузку, потом применится
+		if(!texture){
+			photo_loader.add({id:this.id})
+			texture=assets.nophoto
+		}
+
+		const PHOTO_SIZE=60
+		const tw = texture.width
+		const th = texture.height
+		const scaleX = PHOTO_SIZE / tw
+		const scaleY = PHOTO_SIZE / th
+		const matrix = new PIXI.Matrix()
+		matrix.scale(scaleX, scaleY)
+		
+		this.photo.clear()
+		this.photo.lineStyle({width:1.5,color:0xD9D9D9,cap:'round'})
+		this.photo.beginTextureFill({texture,matrix})
+		this.photo.drawCircle(PHOTO_SIZE*0.5,PHOTO_SIZE*0.5,PHOTO_SIZE*0.5)
+		need_render=1
+		
+	}
+		
+	set(person_id,days_to_dr){
+		
+		this.id=person_id
+		this.update_photo()
+		
+		const pdata=familyData[this.id]
+		
+		this.name_t.set2(pdata.name,180)
+		
+		const rel_no_sex=rel_map[pdata.rel]		
+		const rel_with_sex=rel_no_sex?.[pdata.sex]||''
+		
+		const bd=pdata.bd	
+		const dd=pdata.dd	
+		
+		if (bd&&!dd){
+			
+			//это сколько лет
+			const age=this.getFullYears(bd)		
+			this.bd_t.text=bd+' | ' +rel_with_sex
+					
+			
+			const new_age=age+1
+			let info_str=days_to_dr?'Через\n'+dr_dlg.getDayWord(days_to_dr)+'':'Сегодня!'
+			info_str+=('\n'+new_age+this.getYearString(new_age))
+			this.dr_t.text=info_str
+		
+		}
+		
+		
+
+		
+	}
+	
 }
 
 async function upload_texture(texture_cache_id){
@@ -1205,9 +1381,7 @@ tree={
 			familyData[id].parents.push(parent1id,parent2id)
 			console.log(`созданые родители для ${id}  с ид ${parent1id} и ${parent2id}`)
 			parents=familyData[id].parents
-		}	
-		
-		
+		}			
 			
 		let i=0
 		for (const parent_id of parents){
@@ -1216,17 +1390,25 @@ tree={
 			p_card.visible=true
 			p_card.y=i*70
 			p_card.id=parent_id
-			p_card.fill_data(familyData[parent_id],1)
+			p_card.fill_data(familyData[parent_id],'parent')
 			p_card.update_photo()
 	
 			i++
 		}
+		
+		objects.cards_lines.clear()	
+		objects.cards_lines.beginFill(0x111133,0.5)
+		objects.cards_lines.drawRect(0,0,1000,150)
+		objects.cards_lines.endFill()		
+		
+		objects.cards_lines.lineStyle(2, 0xffffff)
+		objects.cards_lines.moveTo(5,150)
+		objects.cards_lines.lineTo(1000,150)
 
 	},
 
 	show_root_person(params={}){
-		
-		
+				
 		const person_id=params.person_id||0
 		this.auto_fold=params.auto_fold||0
 		
@@ -1237,7 +1419,10 @@ tree={
 		objects.controls_cont.visible=true
 		objects.controls_fold_t.text=this.fold_lev
 		
-		objects.cards_pool.find(c=>c.visible=false)
+		objects.cards_pool.find(c=>{
+			c.visible=false
+			c.wait_for_up=0			
+		})
 		
 		//складываем все карточки
 		if (this.auto_fold){
@@ -1251,16 +1436,7 @@ tree={
 			const parents=familyData[person_id].parents	
 			this.show_parents(person_id)	
 		}			
-		
-		objects.cards_lines.clear()	
-		objects.cards_lines.beginFill(0x111133,0.5)
-		objects.cards_lines.drawRect(0,0,1000,145)
-		objects.cards_lines.endFill()		
-		
-		objects.cards_lines.lineStyle(3, 0xffffff)
-		objects.cards_lines.moveTo(5,145)
-		objects.cards_lines.lineTo(1000,145)
-		
+				
 		total_y=150	
 		this.show_person_rec(person_id,0,0)
 	},
@@ -1278,13 +1454,12 @@ tree={
 		const root_card=objects.cards_pool.find(c=>!c.visible)
 		root_card.visible=true
 		if (this.auto_fold) person_data.fold=+(lev===this.fold_lev)		
-		root_card.fill_data(person_data,0,0)
+		root_card.fill_data(person_data,'kid')
 		root_card.y=total_y
 		root_card.lev=lev		
 		root_card.x=x
 		root_card.id=person_id
 		root_card.spouse_id=null
-		root_card.type='kid'
 		root_card.update_photo()
 		total_y+=65
 
@@ -1303,13 +1478,12 @@ tree={
 			const s_card=objects.cards_pool.find(c=>!c.visible)
 			s_card.visible=true
 			if (this.auto_fold) spouse.fold=+(lev===this.fold_lev)
-			s_card.fill_data(spouse,0,1)
+			s_card.fill_data(spouse,'spouse')
 			s_card.y=total_y
 			s_card.x=x+20
 			s_card.id=spouse.id
 			s_card.lev=lev
 			s_card.cur_spouse_id=person_id
-			s_card.type='spouse'
 			s_card.update_photo()
 			total_y+=65
 			
@@ -1701,9 +1875,13 @@ rel={
 		objects.controls_cont.visible=false
 		
 		objects.rel_cont.visible=true
-	
+		
+		
 		objects.rel_card1.init('rel')
 		objects.rel_card2.init('rel')
+		
+		objects.rel_info_t.visible=true
+		objects.rel_info_t.text='ВЫБЕРИТЕ 2 ПЕРСОНЫ ДЛЯ АНАЛИЗА РОДСТВА'
 
 		need_render=1
 		
@@ -1771,6 +1949,8 @@ rel={
 		
 		if(id1===-1) return
 		if(id2===-1) return
+		
+		objects.rel_info_t.visible=false
 		
 		const rel_data=tree.get_rel(id1,id2)
 		const rel_types=['*',...rel_data[0]]
@@ -1930,7 +2110,7 @@ pl={
 			for (let x=0;x<2;x++){			
 				for (let y=0;y<8;y++){
 					const card=objects.pl_cards_pool[i]
-					card.y=120+y*70
+					card.y=115+y*70
 					card.x=x*225
 					i++
 				}
@@ -1994,7 +2174,7 @@ pl={
 		objects.cards_cont.y=0
 		objects.cards_cont.x=0
 		
-		if (this.type==='get'){			
+		if (this.type==='get'){
 			this.resolver(this.selected_person_id)
 		}else{
 			cur_root_id=this.selected_person_id
@@ -2185,7 +2365,7 @@ add_dlg={
 			objects.add_dlg_opt_btn.pointerdown=()=>{this.select_person_down()}
 		}
 		
-		if (type==='edit'){			
+		if (type==='edit'){
 			
 			objects.add_dlg_opt_btn.visible=true
 			objects.add_dlg_info_t.text='Редактирование'
@@ -2305,6 +2485,12 @@ add_dlg={
 		this.close()
 		const person_id=await pl.get_person()
 		if(person_id<0) return
+		
+		
+		if (person_id===this.id){
+			alert('Нельзя выбрать эту же персону')
+			return
+		}
 		
 		if (this.type==='add_spouse'){
 			
@@ -2464,6 +2650,8 @@ add_dlg={
 				
 				if (objects.pl_cont.visible)
 					pl.update()
+				
+				
 			}
 		}				
 		
@@ -2477,7 +2665,11 @@ add_dlg={
 			delete familyData[this.id].empty
 		
 		tree.make_rel_graph()
-		tree.show_root_person({person_id:cur_root_id})
+		
+		//показываем/обновляем дерево
+		if(objects.cards_cont.visible)
+			tree.show_root_person({person_id:cur_root_id})
+		
 		if (this.updated) tree.save()
 		this.close()
 		
@@ -2679,7 +2871,7 @@ dr_dlg={
 		for (let y=0;y<5;y++){
 			const card=objects.dr_cards_pool[y]
 			card.x=20
-			card.y=228+y*70
+			card.y=225+y*70
 			card.visible=false
 		}
 		
@@ -2707,15 +2899,7 @@ dr_dlg={
 			const dr_info=this.dr_list[i]
 			const pdata=familyData[dr_info.id]
 			const card=objects.dr_cards_pool[i]
-			card.set(pdata.id)
-			
-			
-			
-			const ending={0:'',1:'1 день',2:'2 дня',3:'3 дня',4:'4 дня',5:'5 дней',}
-			const info_str=dr_info.days_to_dr?' (через '+this.getDayWord(dr_info.days_to_dr)+')':' (сегодня)'
-			
-			card.name_t.text=pdata.name
-			card.age_t.text=pdata.bd+info_str
+			card.set(pdata.id,dr_info.days_to_dr)
 			card.visible=true
 			
 		}
@@ -2878,6 +3062,53 @@ editor={
 	
 }
 
+info={
+	
+	page:0,
+	
+	activate(){
+		
+		objects.info_cont.visible=true
+		this.switch_page(0)
+		
+	},
+	
+	down(e){
+		
+		const mx=e.data.global.x/app.stage.scale.x
+		const my=e.data.global.y/app.stage.scale.y
+		
+		if (mx<200&&my>600)
+			this.switch_page(-1)
+		
+		if (mx>250&&my>600)
+			this.switch_page(1)
+		
+		if (mx>350&&my<270)
+			this.close()
+		
+	},
+	
+	switch_page(dir){
+		
+		this.page+=dir
+		if (this.page<0) this.page=0
+		if (this.page>2) this.page=2
+		
+		objects.info_bcg.texture=assets[`info_page${this.page}_img`]
+		need_render=1
+	},
+	
+	close(){
+		
+		objects.info_cont.visible=false
+		need_render=1
+	}
+	
+	
+	
+}
+
 main_menu={
 	
 	async activate(){
@@ -2908,7 +3139,7 @@ main_menu={
 		
 		this.close()
 		cur_root_id=0
-		tree.show_root_person(cur_root_id,0)
+		tree.show_root_person({person_id:cur_root_id,auto_fold:1})
 			
 	},
 	
@@ -2916,6 +3147,12 @@ main_menu={
 		
 		this.close()
 		rel.activate()
+		
+	},
+	
+	info_btn_down(){
+	
+		info.activate()
 		
 	},
 	
@@ -3142,12 +3379,11 @@ main_loader={
 	
 	async load2(){		
 		
-		const loader=new PIXI.Loader();	
-		
+		const loader=new PIXI.Loader()
+					
+		loader.add("m2_font", git_src+"fonts/CoreSansDS57CnBold32/font.fnt")		
+		loader.add("m1_font", git_src+"fonts/CoreSansDS57CnBold64/font.fnt")		
 			
-		loader.add("m2_font", git_src+"fonts/Bahnschrift/font.fnt");			
-	
-		
 		const load_list=eval(assets.main_load_list);
 		for (var i = 0; i < load_list.length; i++)
 			if (load_list[i].class ==='sprite'|| load_list[i].class ==='image')
@@ -3163,6 +3399,7 @@ main_loader={
 		}	
 		
 		this.divide_texture(assets.date_pick_months_pack,435,105,'date_pick_months_pack')
+		this.divide_texture(assets.qm_pack,60,60,['qm_tree','qm_spouse','qm_kid','qm_fold','qm_unfold'])
 						
 		for (var i = 0; i < load_list.length; i++) {
 			const obj_class = load_list[i].class;
@@ -3329,7 +3566,7 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	my_data.uid='vk39099558'
+	//my_data.uid='vk39099558'
 	//my_data.uid='gdht42'
 	
 	await main_loader.load1()
@@ -3371,7 +3608,38 @@ async function init_game_env(lang) {
 		tree.mscroll(e)
 		pl.mscroll(e)
 	});
-	window.addEventListener('keydown', function(e) { keyboard.keydown(e.key)});
+	window.addEventListener('keydown', function(e) {keyboard.keydown(e.key)});
+
+
+	//создаем комбинации быстрых кнопок	
+	const t_spr=new PIXI.Sprite()
+	const rt_data={
+		qm_tree:['qm_tree'],
+		qm_kid:['qm_tree','qm_kid','qm_fold'],
+		qm_spouse:['qm_tree','qm_spouse','qm_fold'],
+		qm_kid_nof:['qm_tree','qm_kid'],
+		qm_spouse_nof:['qm_tree','qm_spouse'],
+		qm_kid_f:['qm_tree','qm_kid','qm_unfold'],
+		qm_spouse_f:['qm_tree','qm_spouse','qm_unfold']
+	}
+	
+	for (const [rt_name, textures] of Object.entries(rt_data)){				
+
+		qm_rt[rt_name]=PIXI.RenderTexture.create({width:150,height:60})
+		const cur_rt=qm_rt[rt_name]
+		
+		let x=0
+		for (const t_name of textures){
+			
+			t_spr.texture=assets[t_name]
+			t_spr.x=x
+			app.renderer.render(t_spr,{renderTexture:cur_rt,clear:false})
+			x+=45
+		}		
+	}
+
+	
+
 
 /*
 	c.addEventListener("touchstart", function(e){		
@@ -3410,8 +3678,7 @@ async function init_game_env(lang) {
 		photo_loader.add({id:0})
 	}
 	
-	
-	
+		
 	
 	//return	
 	//удаляем несуществующие ссылки
