@@ -16,26 +16,53 @@ irnd = function(min,max) {
 }
 
 const rel_map={
-	'p':['отец','мать'],
-	'pp':['дед.','бабуш.'],
-	'ppc':['дядя','тетя'],
-	'ppp':['прадед.','прабаб.'],
-	's':['муж','жена'],
-	'c':['сын','дочь'],
-	'cs':['зять','невестка'],
-	'cc':['внук','внучка'],
-	'pc':['брат','сестра'],
-	'ppcc':['2-брат','2-сестра'],
-	'pcs':['зять','невестка'],
-	'pcc':['плем-к','плем-ца'],
-	'ppccc':['2-плем-к.','2-плем-ца'],
-	'pppcc':['2-дядя','2-тетя'],
-	'pppccc':['3-брат','3-сестра'],
-	'sp':['тесть','теща'],
-	'spc':['шурин','свояч-ца'],
-	'pppc':['2-дед-ка','2-баб-ка'],
-	'*':['это вы','это вы']
+	0:{
+		'p':['отец','мать'],
+		'pp':['дед.','бабуш.'],
+		'ppc':['дядя','тетя'],
+		'ppp':['прадед.','прабаб.'],
+		's':['муж','жена'],
+		'c':['сын','дочь'],
+		'cs':['зять','невестка'],
+		'cc':['внук','внучка'],
+		'pc':['брат','сестра'],
+		'ppcc':['2-брат','2-сестра'],
+		'pcs':['зять','невестка'],
+		'pcc':['плем-к','плем-ца'],
+		'ppccc':['2-плем-к.','2-плем-ца'],
+		'pppcc':['2-дядя','2-тетя'],
+		'pppccc':['3-брат','3-сестра'],
+		'sp':['тесть','теща'],
+		'spc':['шурин','свояч-ца'],
+		'pppc':['2-дед-ка','2-баб-ка'],
+		'*':['это вы','это вы']		
+		
+	},
+	1:{
+		'p':['отец','мать'],
+		'pp':['дед.','бабуш.'],
+		'ppc':['дядя','тетя'],
+		'ppp':['прадед.','прабаб.'],
+		's':['муж','жена'],
+		'c':['сын','дочь'],
+		'cs':['зять','невестка'],
+		'cc':['внук','внучка'],
+		'pc':['брат','сестра'],
+		'ppcc':['2-брат','2-сестра'],
+		'pcs':['зять','невестка'],
+		'pcc':['плем-к','плем-ца'],
+		'ppccc':['2-плем-к.','2-плем-ца'],
+		'pppcc':['2-дядя','2-тетя'],
+		'pppccc':['3-брат','3-сестра'],
+		'sp':['свекор','свекровь'],
+		'spc':['деверь','золовка'],
+		'pppc':['2-дед-ка','2-баб-ка'],
+		'*':['это вы','это вы']	
+	}
+
 }
+
+
 
 safe_ls=function(key, val) {
 	try {
@@ -751,6 +778,8 @@ class new_person_card_class extends PIXI.Container{
 			photo_loader.add({id:this.id})
 			texture=assets.nophoto
 		}
+		
+		//texture=await PIXI.Texture.fromURL(multiavatar(irnd(10,99999)));
 
 		const PHOTO_SIZE=60
 		const tw = texture.width
@@ -801,14 +830,22 @@ class new_person_card_class extends PIXI.Container{
 
 	fill_data(person_data, type){
 		
+		
+		
+		
 		this.photo.alpha=1
 		
 		this.id_t.text=person_data.id
 		this.age_t.text=person_data.bd
 		
-		const rel_no_sex=rel_map[person_data.rel]		
+		const rel_no_sex=rel_map[person_data.sex||0][person_data.rel]		
 		const rel_with_sex=rel_no_sex?.[person_data.sex]
 		this.rel_t.text=rel_with_sex||''
+				
+		//const russianNames=namesByGender[person_data.sex]
+		//this.name_t.text=russianNames[irnd(0,russianNames.length-1)]
+		
+		this.name_t.set2(person_data.name,150)			
 		this.quick_menu.interactive=true
 		this.type=type		
 		
@@ -819,8 +856,7 @@ class new_person_card_class extends PIXI.Container{
 		
 		const matrix = new PIXI.Matrix()
 		matrix.scale(scaleX, scaleY)
-		
-		
+				
 		if (type==='parent'){
 			
 			if (person_data.empty){
@@ -831,7 +867,7 @@ class new_person_card_class extends PIXI.Container{
 				this.quick_menu.interactive=false
 			}else{
 				this.age_t.alpha=1
-				this.name_t.set2(person_data.name,130)				
+				//this.name_t.set2(person_data.name,130)				
 				this.quick_menu.texture=qm_rt.qm_tree				
 			}
 			
@@ -840,7 +876,7 @@ class new_person_card_class extends PIXI.Container{
 			return
 		}
 		
-		this.name_t.set2(person_data.name,150)		
+	
 		
 		if (type==='spouse'){
 			
@@ -902,11 +938,16 @@ class new_person_card_class extends PIXI.Container{
 		
 		const pdata=familyData[this.id]
 		
+		
+		
+		//const russianNames=namesByGender[pdata.sex]
+		//this.name_t.text=russianNames[irnd(0,russianNames.length-1)]
+		
 		this.name_t.set2(pdata.name,140)
 		
 		this.id_t.text=this.id
 		
-		const rel_no_sex=rel_map[pdata.rel]		
+		const rel_no_sex=rel_map[pdata.sex||0][pdata.rel]		
 		const rel_with_sex=rel_no_sex?.[pdata.sex]
 		this.rel_t.text=rel_with_sex||''
 		
@@ -1019,7 +1060,7 @@ class dr_card_class extends PIXI.Container{
 		
 		this.name_t.set2(pdata.name,180)
 		
-		const rel_no_sex=rel_map[pdata.rel]		
+		const rel_no_sex=rel_map[pdata.sex||0][pdata.rel]		
 		const rel_with_sex=rel_no_sex?.[pdata.sex]||''
 		
 		const bd=pdata.bd	
@@ -1359,11 +1400,11 @@ tree={
 		if(parents[0]===undefined){
 			
 			const parent1id=tree.get_new_id()	
-			familyData[parent1id]={id:parent1id,name:'',gen:0,empty:1,fold:0,spouses:[],parents:[],kids:[id]}
+			familyData[parent1id]={id:parent1id,name:'',gen:0,empty:1,fold:0,sex:0,spouses:[],parents:[],kids:[id]}
 			const parent1=familyData[parent1id]
 			
 			const parent2id=tree.get_new_id()	
-			familyData[parent2id]={id:parent2id,name:'',gen:0,empty:1,fold:0,spouses:[],parents:[],kids:[id]}
+			familyData[parent2id]={id:parent2id,name:'',gen:0,empty:1,fold:0,sex:1,spouses:[],parents:[],kids:[id]}
 			const parent2=familyData[parent2id]
 			
 			parent1.spouses.push(parent2id)
@@ -3637,8 +3678,8 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	//my_data.uid='vk39099558'
-	//my_data.uid='gdht42'
+	my_data.uid='vk39099558'
+	my_data.uid='fgh5253h'
 	
 	main_loader.process_load_list(main_loader.pre_load_list)
 	await main_loader.load2()
