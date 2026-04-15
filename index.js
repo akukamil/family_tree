@@ -3678,8 +3678,8 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	my_data.uid='vk39099558'
-	my_data.uid='fgh5253h'
+	//my_data.uid='vk39099558'
+	//my_data.uid='fgh5253h'
 	
 	main_loader.process_load_list(main_loader.pre_load_list)
 	await main_loader.load2()
