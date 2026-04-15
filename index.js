@@ -347,7 +347,7 @@ auth2={
 
 		//сохраняем этот uid в локальном хранилище
 		try {
-			localStorage.setItem('pool_uid', uid);
+			localStorage.setItem('family_tree_uid', uid);
 		} catch (e) {alert(e)}
 
 		return uid;
@@ -408,7 +408,7 @@ auth2={
 		let local_uid = null;
 
 		try {
-			local_uid = localStorage.getItem('pool_uid');
+			local_uid = localStorage.getItem('family_tree_uid');
 		} catch (e) {alert(e)}
 
 		if (local_uid !== null) return local_uid;
@@ -612,7 +612,7 @@ class new_person_card_class extends PIXI.Container{
 		this.frame.width=270
 		this.frame.height=80
 		
-		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 19,align: 'center'})
+		this.name_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 18,align: 'center'})
 		this.name_t.tint=0xEFEBDE		
 		this.name_t.y=params.name_y||22
 		
@@ -646,15 +646,15 @@ class new_person_card_class extends PIXI.Container{
 
 		}
 		
-		this.rel_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 20})
+		this.rel_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 20})
 		this.rel_t.y=params.rel_t_y||57
 		this.rel_t.tint=0x59CEC9
 
-		this.age_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 20})
+		this.age_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 19})
 		this.age_t.y=params.age_t_y||40
 		this.age_t.tint=0xEFC7A4
 		
-		this.id_t=new PIXI.BitmapText('0', {fontName: 'mfont48',fontSize: 18,align: 'center'})
+		this.id_t=new PIXI.BitmapText('0', {fontName: 'bahnschrift48',fontSize: 18,align: 'center'})
 		this.id_t.anchor.set(0.5,0.5)
 		this.id_t.x=15
 		this.id_t.y=15
@@ -772,7 +772,7 @@ class new_person_card_class extends PIXI.Container{
 		
 		const f_data=familyData[this.id]
 		if (f_data.empty){
-			alert('нет данных')
+			sys_msg.add('Нет данных!')
 			return
 		}
 		objects.cards_cont.y=0
@@ -810,9 +810,7 @@ class new_person_card_class extends PIXI.Container{
 		const rel_with_sex=rel_no_sex?.[person_data.sex]
 		this.rel_t.text=rel_with_sex||''
 		this.quick_menu.interactive=true
-		this.type=type
-		
-		
+		this.type=type		
 		
 		const tw = assets.qm_kid.width
 		const th = assets.qm_kid.height
@@ -842,7 +840,7 @@ class new_person_card_class extends PIXI.Container{
 			return
 		}
 		
-		this.name_t.set2(person_data.name,130)		
+		this.name_t.set2(person_data.name,150)		
 		
 		if (type==='spouse'){
 			
@@ -855,10 +853,7 @@ class new_person_card_class extends PIXI.Container{
 			}else{
 				this.quick_menu.texture=qm_rt.qm_kid_nof
 				this.bcg.texture=assets.card_bcg_short
-			}			
-			
-			
-
+			}
 		}
 		
 		if (type==='kid'){
@@ -872,11 +867,7 @@ class new_person_card_class extends PIXI.Container{
 				this.quick_menu.texture=qm_rt.qm_spouse_nof
 				this.bcg.texture=assets.card_bcg_short
 			}
-			
-
-		}
-		
-		
+		}		
 	}
 
 	getFullYears(dateString) {
@@ -947,17 +938,17 @@ class dr_card_class extends PIXI.Container{
 		this.photo=new PIXI.Graphics()
 		this.photo.x=20
 
-		this.name_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 25,align: 'center'})
+		this.name_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 25,align: 'center'})
 		this.name_t.tint=0xffffff	
 		this.name_t.y=5
 		this.name_t.x=90
 				
-		this.bd_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 25})
+		this.bd_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 25})
 		this.bd_t.y=30
 		this.bd_t.x=90
 		this.bd_t.tint=0xaaaaaa
 		
-		this.dr_t=new PIXI.BitmapText('', {fontName: 'mfont48',fontSize: 25,align:'center',lineSpacing:35})
+		this.dr_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 25,align:'center',lineSpacing:35})
 		this.dr_t.y=30
 		this.dr_t.x=350
 		this.dr_t.anchor.set(0.5,0.5)
@@ -2330,7 +2321,7 @@ add_dlg={
 		if (type==='add_spouse'){	
 		
 			if (card.type!=='kid'){
-				alert('здесь это сделать невозможно')		
+				sys_msg.add('Ошибка...')		
 				return
 			}
 			
@@ -2349,7 +2340,7 @@ add_dlg={
 		if (type==='add_child'){	
 		
 			if (card.type!=='spouse'){
-				alert('здесь нельзя добавить ребенка')
+				sys_msg.add('Ошибка...')	
 				return
 			}
 			
@@ -2435,13 +2426,13 @@ add_dlg={
 		
 		const t=await this.choosePhotoAndGetTexture()
 		if(!t) {
-			alert('555')
+			sys_msg.add('Ошибка при загрузке фото...')	
 			return
 		}
 		
 		const t2=await editor.activate(t)
 		if(!t2){
-			alert('6667')
+			sys_msg.add('Ошибка при обработке фото...')	
 			return
 		}
 		objects.add_dlg_photo.set_texture(t2)
@@ -2471,7 +2462,7 @@ add_dlg={
 		
 		const f_data=familyData[this.id]
 		if (f_data.empty){
-			alert('трн')
+			sys_msg.add('Нет данных по данной персоне...')	
 			return
 		}
 		
@@ -2488,19 +2479,19 @@ add_dlg={
 		
 		
 		if (person_id===this.id){
-			alert('Нельзя выбрать эту же персону')
+			sys_msg.add('Невозможно выбрать данную персону!')	
 			return
 		}
 		
 		if (this.type==='add_spouse'){
 			
 			if (familyData[this.id].spouses.includes(person_id)){
-				alert('Эти индивиды уже супруги')
+				sys_msg.add('Эти персоны уже супруги')
 				return
 			}
 			
 			if (familyData[person_id].spouses.includes(this.id)){
-				alert('Эти индивиды уже супруги')
+				sys_msg.add('Эти персоны уже супруги')
 				return
 			}
 			
@@ -2513,12 +2504,12 @@ add_dlg={
 			
 			const new_kid_data=familyData[person_id]
 			if (new_kid_data.parents.length){
-				alert('У этого человека уже есть родители')
+				sys_msg.add('У этого человека уже есть родители!')
 				return
 			}
 			
 			if (new_kid_data.parents.includes(person_id)){
-				alert('Вы уже являетесь родителем этого индивида')
+				sys_msg.add('Вы уже являетесь родителем этой персоны!')
 				return
 			}
 			
@@ -2535,17 +2526,17 @@ add_dlg={
 	remove_person_down(){	
 
 		if(this.type==='removed'){
-			alert('удалено')
+			sys_msg.add('Удалено!')
 			return	
 		}
 	
 		if (familyData[this.id].kids.length){
-			alert('Нужно сначала удалить потомков')
+			sys_msg.add('Нужно сначала удалить потомков!')
 			return
 		}
 		
 		if (this.id===0){
-			alert('Нельзя удалять основного человека')
+			sys_msg.add('Нельзя удалять основного человека')
 			return
 		}
 		
@@ -2591,7 +2582,7 @@ add_dlg={
 		if (this.type==='add_child'){	
 		
 			if (!this.updated){
-				alert('Нужно добавить имя ребенка!')
+				sys_msg.add('Нужно добавить имя ребенка!')
 				return
 			}
 		
@@ -2615,7 +2606,7 @@ add_dlg={
 		if (this.type==='add_spouse'){	
 
 			if (!this.updated){
-				alert('Нужно добавить имя супруга/супруги!')
+				sys_msg.add('Нужно добавить имя супруга/супруги!')
 				return
 			}
 
@@ -3139,7 +3130,7 @@ main_menu={
 		
 		this.close()
 		cur_root_id=0
-		tree.show_root_person({person_id:cur_root_id,auto_fold:1})
+		tree.show_root_person({person_id:cur_root_id,auto_fold:1,cont_y:0,cont_x:0})
 			
 	},
 	
@@ -3164,6 +3155,37 @@ main_menu={
 	}
 	
 	
+}
+
+sys_msg={
+
+	promise_resolve :0,
+
+	async add(t){
+
+		if (this.promise_resolve) this.promise_resolve('forced');
+
+		sound.play('popup');
+
+		//показываем сообщение
+		objects.t_sys_msg.text=t;
+		const ares=await anim3.add(objects.sys_msg_cont,{y:[-50,objects.sys_msg_cont.sy,'linear']}, true, 0.25,false);
+		if (ares==='killed') return;
+
+		//ждем
+		const res = await new Promise(resolve => {
+				sys_msg.promise_resolve = resolve;
+				setTimeout(resolve,5000)
+			}
+		);
+
+		//это если насильно закрываем
+		if (res==='forced') return;
+
+		anim3.add(objects.sys_msg_cont,{y:[objects.sys_msg_cont.y,-50,'linear']}, false, 0.25,false);
+
+	}
+
 }
 
 keyboard={
@@ -3335,6 +3357,8 @@ function resize() {
 
 main_loader={
 	
+	pre_load_list:0,
+	
 	divide_texture(t,frame_w,frame_h, names){
 		
 		const frames_x=Math.floor(t.width/frame_w)
@@ -3365,25 +3389,46 @@ main_loader={
 	
 	async load1(){
 
+		git_src=''
+
 		const loader=new PIXI.Loader();
-
-		loader.add('main_load_list',git_src+'load_list.txt');
-
+		
+		loader.add('pre_load_list',git_src+'pre_load_list.txt')
+		loader.add('bahnschrift48',git_src+'https://akukamil.github.io/common/fonts/bahnschrift48/f.fnt')	
+		
 		await new Promise(res=>loader.load(res))
+	
+		
+		//добавляем из запускного листа загрузки
+		this.pre_load_list=eval(loader.resources.pre_load_list.data)
+		for (let i = 0; i < this.pre_load_list.length; i++)
+			if (this.pre_load_list[i].class==='sprite' || this.pre_load_list[i].class==='image')
+				loader.add(this.pre_load_list[i].name, git_src+'res/common/' + this.pre_load_list[i].name + '.' +  this.pre_load_list[i].image_format);
+		loader.add('main_load_list',git_src+'main_load_list.txt')
+
+			
+		//загружаем
+		await new Promise(res=>loader.load(res))
+				
+		//переносим все в ассеты
 		for (const res_name in loader.resources){
 			const res=loader.resources[res_name];
 			assets[res_name]=res.texture||res.sound||res.data;
 		}
-
+		
+		//убираем надпись
+		const l_text=document.getElementById('loadingText')
+		if(l_text)
+			document.getElementById('loadingText').remove();
+		
+		
+		
 	},
 	
 	async load2(){		
 		
 		const loader=new PIXI.Loader()
-					
-		loader.add("m2_font", git_src+"fonts/CoreSansDS57CnBold32/font.fnt")		
-		loader.add("m1_font", git_src+"fonts/CoreSansDS57CnBold64/font.fnt")		
-		loader.add("m_font48", git_src+"fonts/CoreSansDS57CnBold48/font.fnt")		
+
 			
 		const load_list=eval(assets.main_load_list);
 		for (var i = 0; i < load_list.length; i++)
@@ -3392,8 +3437,15 @@ main_loader={
 
 		loader.add('nophoto', git_src+'res/common/nophoto.jpg');
 		
-		await new Promise((resolve, reject)=> loader.load(resolve));
+		//прогресс
+		loader.onProgress.add((l,res)=>{
+			objects.loading_bar_mask.width =350*l.progress*0.01;
+			need_render=1
+			objects.loading_progress_t.text=Math.round(l.progress)+'%';
+		});
 		
+		await new Promise(res=> loader.load(res));
+		anim3.add(objects.loading_cont,{alpha:[1,0,'linear']}, false, 0.25);
 		for (const res_name in loader.resources){
 			const res=loader.resources[res_name];			
 			assets[res_name]=res.texture||res.sound||res.data;			
@@ -3402,6 +3454,16 @@ main_loader={
 		this.divide_texture(assets.date_pick_months_pack,435,105,'date_pick_months_pack')
 		this.divide_texture(assets.qm_pack,60,60,['qm_tree','qm_spouse','qm_kid','qm_fold','qm_unfold'])
 						
+		this.process_load_list(load_list)
+		
+		need_render=1
+
+	},
+	
+	process_load_list(load_list){
+		
+		//создаем спрайты и массивы спрайтов и запускаем первую часть кода
+		
 		for (var i = 0; i < load_list.length; i++) {
 			const obj_class = load_list[i].class;
 			const obj_name = load_list[i].name;
@@ -3414,6 +3476,8 @@ main_loader={
 				break;
 
 			case "block":
+				if (obj_name==='cells')
+					console.log(load_list[i].code)
 				eval(load_list[i].code0);
 				break;
 
@@ -3430,12 +3494,13 @@ main_loader={
 			}
 		}
 
+		//обрабатываем вторую часть кода в объектах
 		for (var i = 0; i < load_list.length; i++) {
 			const obj_class = load_list[i].class;
 			const obj_name = load_list[i].name;
 			console.log('Processing: ' + obj_name)
-			
-			
+
+
 			switch (obj_class) {
 			case "sprite":
 				eval(load_list[i].code1);
@@ -3445,7 +3510,7 @@ main_loader={
 				eval(load_list[i].code1);
 				break;
 
-			case "cont":	
+			case "cont":
 				eval(load_list[i].code1);
 				break;
 
@@ -3456,7 +3521,6 @@ main_loader={
 				break;
 			}
 		}
-			
 
 	}
 	
@@ -3539,17 +3603,6 @@ async function init_game_env(lang) {
 				
 	git_src=""
 	
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(70,70,70,1)}</style>';
-	const dw=M_WIDTH/document.body.clientWidth;
-	const dh=M_HEIGHT/document.body.clientHeight;
-	const resolution=Math.min(1.5,window.devicePixelRatio );	
-	const opts={width:M_WIDTH, height:M_HEIGHT,antialias:true,resolution,autoDensity:true};
-	app.stage = new PIXI.Container();
-	app.renderer = new PIXI.Renderer(opts);
-	const c=document.body.appendChild(app.renderer.view);
-	c.style['boxShadow'] = '0 0 15px #000000';
-				
-				
 	define_platform_and_language()
 				
 	await auth2.init()
@@ -3561,7 +3614,24 @@ async function init_game_env(lang) {
 		secretAccessKey: '75yIFODq85n959C6zDPSAd2evB6ZavQhuxSlRPFf'
 	});
 	
-	s3 = new AWS.S3();
+	s3 = new AWS.S3();	
+	
+	await main_loader.load1()
+	need_render=1
+	
+	
+	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(70,70,70,1)}</style>';
+	const dw=M_WIDTH/document.body.clientWidth;
+	const dh=M_HEIGHT/document.body.clientHeight;
+	const resolution=Math.min(1.5,window.devicePixelRatio );	
+	const opts={width:M_WIDTH, height:M_HEIGHT,antialias:true,resolution,autoDensity:true};
+	app.stage = new PIXI.Container();
+	app.renderer = new PIXI.Renderer(opts);
+	const c=document.body.appendChild(app.renderer.view);
+	c.style['boxShadow'] = '0 0 15px #ffffff';
+	c.style.outline = '1px solid rgb(60, 60, 60)';
+				
+
 
 	resize();
 	window.addEventListener('resize', resize);
@@ -3570,7 +3640,7 @@ async function init_game_env(lang) {
 	//my_data.uid='vk39099558'
 	//my_data.uid='gdht42'
 	
-	await main_loader.load1()
+	main_loader.process_load_list(main_loader.pre_load_list)
 	await main_loader.load2()
 		
 	PIXI.BitmapText.prototype.set2=function(text,w){		

@@ -1,9 +1,32 @@
 <!DOCTYPE html>
 <html>
 <meta name="http-equiv" content="Content-type: text/html; charset=windows-1251">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(40,40,50,1);
+}
+
+.loading-title {
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+}
+</style>
+<div class="loading-title"  id="loadingText">Loading...</div>
+
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1354.0.min.js"></script>
 <script src="pixi_scale.min.js" ></script>
-<script src="load_list.txt" charset="utf-8"></script>
 <script src="index.js" charset="utf-8"></script>
  
 <body onload="init_game_env()">
