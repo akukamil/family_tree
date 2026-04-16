@@ -3649,7 +3649,7 @@ async function init_game_env(lang) {
 	need_render=1
 	
 	
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(70,70,70,1)}</style>';
+	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(50,60,70,1)}</style>';
 	const dw=M_WIDTH/document.body.clientWidth;
 	const dh=M_HEIGHT/document.body.clientHeight;
 	const resolution=Math.min(1.5,window.devicePixelRatio );	
