@@ -62,8 +62,6 @@ const rel_map={
 
 }
 
-
-
 safe_ls=function(key, val) {
 	try {
 		if (val === null || val===undefined) {
@@ -792,7 +790,7 @@ class new_person_card_class extends PIXI.Container{
 		this.photo.clear()
 		this.photo.lineStyle({width:1.5,color:0xD9D9D9,cap:'round'})
 		this.photo.beginTextureFill({texture,matrix})
-		this.photo.drawRoundedRect(0,0,PHOTO_SIZE,PHOTO_SIZE,17)
+		this.photo.drawRoundedRect(0,0,PHOTO_SIZE,PHOTO_SIZE,16)
 		need_render=1
 		
 	}	
@@ -829,10 +827,7 @@ class new_person_card_class extends PIXI.Container{
 	}
 
 	fill_data(person_data, type){
-		
-		
-		
-		
+				
 		this.photo.alpha=1
 		
 		this.id_t.text=person_data.id
@@ -847,15 +842,7 @@ class new_person_card_class extends PIXI.Container{
 		
 		this.name_t.set2(person_data.name,150)			
 		this.quick_menu.interactive=true
-		this.type=type		
-		
-		const tw = assets.qm_kid.width
-		const th = assets.qm_kid.height
-		const scaleX = 60 / tw
-		const scaleY = 60 / th
-		
-		const matrix = new PIXI.Matrix()
-		matrix.scale(scaleX, scaleY)
+		this.type=type			
 				
 		if (type==='parent'){
 			
@@ -875,9 +862,7 @@ class new_person_card_class extends PIXI.Container{
 
 			return
 		}
-		
-	
-		
+					
 		if (type==='spouse'){
 			
 			if (person_data.kids.length){
@@ -3116,7 +3101,7 @@ info={
 		if (mx>250&&my>600)
 			this.switch_page(1)
 		
-		if (mx>350&&my<270)
+		if (mx>380&&my<250)
 			this.close()
 		
 	},
@@ -3125,9 +3110,12 @@ info={
 		
 		this.page+=dir
 		if (this.page<0) this.page=0
-		if (this.page>2) this.page=2
+		if (this.page>3) this.page=3
 		
-		objects.info_bcg.texture=assets[`info_page${this.page}_img`]
+		const active_btn_x=[165,205,245,285]
+		objects.info_active_btn.x=active_btn_x[this.page]
+		
+		objects.info_page.texture=assets[`info_page${this.page}_img`]
 		need_render=1
 	},
 	
