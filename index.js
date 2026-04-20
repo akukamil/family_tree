@@ -849,7 +849,7 @@ class new_person_card_class extends PIXI.Container{
 			if (person_data.empty){
 				this.age_t.alpha=0.4
 				this.name_t.text=''
-				this.age_t.text='нет данных'
+				this.age_t.text='Родитель (нет данных)'
 				this.quick_menu.texture=null
 				this.quick_menu.interactive=false
 			}else{
@@ -1403,12 +1403,13 @@ tree={
 		let i=0
 		for (const parent_id of parents){
 			
+			const parent_empty=familyData[parent_id].empty
 			const p_card=objects.cards_pool.find(c=>!c.visible)
 			p_card.visible=true
 			p_card.y=i*70
 			p_card.id=parent_id
 			p_card.fill_data(familyData[parent_id],'parent')
-			p_card.update_photo()
+			p_card.update_photo(parent_empty?assets.add_person_img:0)
 	
 			i++
 		}
