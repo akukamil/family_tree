@@ -3816,6 +3816,9 @@ async function init_game_env(lang) {
 	dr_dlg.activate()
 	main_menu.activate()
 	
+	if (game_platform==='VK')
+		vkBridge.send('VKWebAppShowBannerAd', {banner_location: 'top',layout_type:'resize'});
+
 }
 
 function main_loop() {
