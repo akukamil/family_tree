@@ -1099,6 +1099,7 @@ photo_loader={
 	on:0,
 	add(data){
 
+		if (!familyData[data.id].photo) return
 
 		if (this.queue.find(v=>v.id===data.id)||this.done.includes(data.id)) return
 		this.queue.push(data)
@@ -2251,7 +2252,8 @@ pl={
 	},
 
 	act_btn_down(){
-
+		
+		if (anim3.any_on()) return
 		if (this.selected_person_id<0) return
 
 		need_render=1
@@ -2268,12 +2270,14 @@ pl={
 	},
 
 	edit_down(){
+		if (anim3.any_on()) return
 		need_render=1
 		add_dlg.activate({id:this.selected_person_id},'edit')
 	},
 
 	close_down(){
-
+		
+		if (anim3.any_on()) return
 		need_render=1
 		this.resolver(-1)
 		this.close()
@@ -2285,6 +2289,7 @@ pl={
 
 	down(e){
 
+		if (anim3.any_on()) return
 		need_render=1
 		const mx=e.data.global.x/app.stage.scale.x
 		const my=e.data.global.y/app.stage.scale.y
@@ -2333,7 +2338,7 @@ add_dlg={
 	id:0,
 	card:0,
 	type:'',
-	updated:0,
+	updated:{},
 	updated_photo:0,
 	sex:0,
 	resolver:0,
@@ -2466,7 +2471,7 @@ add_dlg={
 		anim3.add(objects.add_dlg_cont,{alpha:[0,1,'linear']}, true, 0.25)
 
 		this.updated_photo=0
-		this.updated=0
+		this.updated={}
 	},
 
 	set_sex(sex){
@@ -2480,7 +2485,7 @@ add_dlg={
 		need_render=1
 		const new_sex=1-this.sex
 		this.set_sex(new_sex)
-		this.updated=1
+		this.updated.sex=1
 	},
 
 	async edit_name_down(){
@@ -2489,7 +2494,7 @@ add_dlg={
 		if(!name) return
 		if (name.length>1){
 			objects.add_dlg_name_t.text=name
-			this.updated=1
+			this.updated.name=1
 		}
 		need_render=1
 
@@ -2501,7 +2506,7 @@ add_dlg={
 		if(!date_s) return
 		need_render=1
 		objects.add_dlg_bd_t.text=date_s
-		this.updated=1
+		this.updated.bd=1
 
 	},
 
@@ -2511,7 +2516,7 @@ add_dlg={
 		if(!date_s) return
 		need_render=1
 		objects.add_dlg_dd_t.text=date_s
-		this.updated=1
+		this.updated.dd=1
 
 	},
 
@@ -2529,19 +2534,16 @@ add_dlg={
 			return
 		}
 		objects.add_dlg_photo.set_texture(t2)
-		this.updated=1
+		this.updated.photo=1
 		this.updated_photo=t2
 		need_render=1
 
 	},
 
 	async photo_down(){
-
 		need_render=1
 		objects.photo_preview_cont.visible=true
-		objects.photo_preview.texture=photo_loader.cache[this.id]
-
-
+		objects.photo_preview.texture=photo_loader.cache[this.id]||assets.nophoto
 	},
 
 	preview_down(){
@@ -2650,7 +2652,6 @@ add_dlg={
 		}
 
 		delete familyData[this.id]
-		this.updated=1
 
 		s3.deleteObjects({Bucket:BUCKET_NAME,Delete: {Objects: [{Key: my_data.uid+'/img'+this.id}]}}, function(err, data) {
 			if (err) console.log(err, err.stack);
@@ -2676,7 +2677,7 @@ add_dlg={
 
 		if (this.type==='add_child'){
 
-			if (!this.updated){
+			if (!this.updated.name){
 				sys_msg.add('Нужно добавить имя ребенка!')
 				return
 			}
@@ -2693,6 +2694,7 @@ add_dlg={
 			familyData[this.id].kids.push(new_id)
 			familyData[spouse_id].kids.push(new_id)
 			if (this.updated_photo)	{
+				familyData[new_id].photo=1
 				photo_loader.cache[new_id]=new PIXI.Texture(this.updated_photo.baseTexture)
 				upload_texture(new_id)
 			}
@@ -2700,7 +2702,7 @@ add_dlg={
 
 		if (this.type==='add_spouse'){
 
-			if (!this.updated){
+			if (!this.updated.name){
 				sys_msg.add('Нужно добавить имя супруга/супруги!')
 				return
 			}
@@ -2714,6 +2716,7 @@ add_dlg={
 			familyData[new_id]={id:new_id,name,spouses:[this.id],sex:this.sex,parents:[],kids:[],fold:0,bd,dd}
 			familyData[this.id].spouses.push(new_id)
 			if (this.updated_photo)	{
+				familyData[new_id].photo=1
 				photo_loader.cache[new_id]=new PIXI.Texture(this.updated_photo.baseTexture)
 				upload_texture(new_id)
 			}
@@ -2721,7 +2724,7 @@ add_dlg={
 
 		if (this.type==='edit'){
 
-			if(this.updated) {
+			if(Object.keys(this.updated).length) {
 
 				const pdata=familyData[this.id]
 				pdata.name=objects.add_dlg_name_t.text
@@ -2730,13 +2733,13 @@ add_dlg={
 				pdata.sex=this.sex
 
 				if (this.updated_photo)	{
+					pdata.photo=1
 					photo_loader.cache[this.id]=new PIXI.Texture(this.updated_photo.baseTexture)
 					upload_texture(this.id)
 				}
 
 				if (objects.pl_cont.visible)
 					pl.update()
-
 
 			}
 		}
@@ -2756,7 +2759,8 @@ add_dlg={
 		if(objects.cards_cont.visible)
 			tree.show_root_person({person_id:cur_root_id})
 
-		if (this.updated) tree.save()
+		if (Object.keys(this.updated).length) tree.save()
+			
 		this.close()
 
 	},
@@ -3181,7 +3185,18 @@ editor={
 
 	zoom_down(dir){
 
-		objects.editor_img.scale_xy+=dir*0.1
+		const new_scale=objects.editor_img.scale_xy+dir*0.1
+		const new_height=objects.editor_img.texture.height*new_scale
+		const new_width=objects.editor_img.texture.width*new_scale
+
+		if (new_height<370&&new_width<370)
+			return
+		
+		if (new_scale>3)
+			return
+		
+		
+		objects.editor_img.scale_xy=new_scale
 		need_render=1
 	},
 
@@ -3325,7 +3340,8 @@ main_menu={
 	},
 
 	open_my_tree_down(){
-
+		
+		if (anim3.any_on()) return
 		this.close()
 		cur_root_id=0
 		tree.show_root_person({person_id:cur_root_id,auto_fold:1,cont_y:0,cont_x:0})
@@ -3333,14 +3349,16 @@ main_menu={
 	},
 
 	rel_analysis_down(){
-
+		
+		if (anim3.any_on()) return
 		this.close()
 		rel.activate()
 
 	},
 
 	info_btn_down(){
-
+		
+		if (anim3.any_on()) return
 		info.activate()
 
 	},
