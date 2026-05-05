@@ -2524,13 +2524,13 @@ add_dlg={
 
 		const t=await this.choosePhotoAndGetTexture()
 		if(!t) {
-			sys_msg.add('Ошибка при загрузке фото...')
+			sys_msg.add('Фото не загружено...')
 			return
 		}
 
 		const t2=await editor.activate(t)
 		if(!t2){
-			sys_msg.add('Ошибка при обработке фото...')
+			sys_msg.add('Фото не загружено...')
 			return
 		}
 		objects.add_dlg_photo.set_texture(t2)
