@@ -3998,7 +3998,10 @@ async function init_game_env(lang) {
 
 	}else{
 		//загружаем основного для отображения на кнопке
-		photo_loader.add({id:0})
+		if(familyData[0].photo)
+			photo_loader.add({id:0})
+		else
+			photo_loader.add({id:0,url:my_data.orig_pic_url})
 	}
 
 
