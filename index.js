@@ -1076,17 +1076,37 @@ class dr_card_class extends PIXI.Container{
 
 }
 
-async function upload_texture(texture_cache_id){
+async function upload_texture(id){
 
-	const texture=photo_loader.cache[texture_cache_id]
+	const texture=photo_loader.cache[id]
 	const jpegBase64=await app.renderer.plugins.extract.base64(new PIXI.Sprite(texture),'image/jpeg');
 
-	s3.upload(
-	{Bucket:BUCKET_NAME,Key:my_data.uid+'/img'+texture_cache_id,Body:jpegBase64},
-		function(err, data) {
-		if (err) console.error(err);
-		else console.log('Upload success:', data);
-	});
+	try {
+		const response = await fetch('https://mtserver2.ru:443/save', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				uid: my_data.uid,
+				img: jpegBase64,
+				img_id:id
+			})
+		});
+
+		const result = await response.json();
+
+		if (response.ok) {
+			console.log('Photo saved:', result.filename);
+			return result;
+		} else {
+			throw new Error(result.error);
+		}
+
+	} catch (error) {
+		console.error('Failed to send photo:', error);
+		throw error;
+	}
 
 }
 
@@ -1124,7 +1144,6 @@ photo_loader={
 		const data=this.queue.shift()
 		const id=data.id
 		const url=data.url
-		const img_name=my_data.uid+'/img'+id
 		this.done.push(id)
 
 
@@ -1134,22 +1153,8 @@ photo_loader={
 		need_render=1
 
 		try{
-
-			if (url){
-				this.loader.add(img_name,url)
-				await new Promise(r=>this.loader.load(r))
-				this.cache[id]=this.loader.resources[img_name].texture
-			}else{
-
-				const data = await s3.getObject({Bucket:BUCKET_NAME,Key:img_name}).promise()
-				if (data){
-					this.loader.add(img_name,data.Body.toString())
-					await new Promise(r=>this.loader.load(r))
-					this.cache[id]=this.loader.resources[img_name].texture
-				}
-			}
-
-
+			const t=await PIXI.Texture.fromURL(`https://mtserver2.ru:8443/get?uid=${my_data.uid}&file=${id}.jpg`)
+			this.cache[id]=t
 		}catch(e){
 			this.cache[id]=assets.nophoto
 			console.log(e)
@@ -1726,7 +1731,7 @@ tree={
 
 	},
 
-	save(){
+	async save(){
 
 		//return
 		const new_obj=JSON.parse(JSON.stringify(familyData))
@@ -1741,12 +1746,31 @@ tree={
 				delete new_obj[key]
 		}
 
-		s3.upload(
-		{Bucket:BUCKET_NAME,Key:my_data.uid+'/TREE',Body:JSON.stringify(new_obj)},
-			function(err, data) {
-			if (err) console.error(err);
-			else console.log('Upload success:', data);
-		});
+		try {
+			const response = await fetch('https://mtserver2.ru:443/save', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					uid: my_data.uid,
+					tree: new_obj
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('Photo saved:');
+				return result;
+			} else {
+				throw new Error(result.error);
+			}
+
+		} catch (error) {
+			console.error('Failed to send photo:', error);
+			throw error;
+		}
 
 	},
 
@@ -2748,6 +2772,9 @@ add_dlg={
 
 
 		}
+		
+		
+		
 
 		//this.set_photo(objects.add_dlg_photo.texture)
 		if (this.id&&this.updated)
@@ -3950,19 +3977,25 @@ async function init_game_env(lang) {
 
 	//загружаем дерево
 	try{
-		f_data=await s3.getObject({Bucket: BUCKET_NAME,Key: my_data.uid+'/TREE'}).promise()
-		familyData=JSON.parse(f_data.Body.toString())
+		
+		const response = await fetch(`https://mtserver2.ru:443/get?file=tree.json&uid=${my_data.uid}`);
+		if (!response.ok) {
+			throw new Error(`File not found: ${response.status} ${response.statusText}`);
+		}
+		familyData=await response.json()
+
 	}catch(e){
 		console.log(e)
-		f_data={}
+		familyData={}
 	}
 
 	//новое дерево
 	if (Object.keys(familyData).length===0){
-		//загружаем фото и созжаем первую персону
-		photo_loader.add({id:0,url:my_data.orig_pic_url})
+		//загружаем фото и создаем первую персону
 		const sex=[0,1,0][my_data.sex]
-		familyData[0]={id:0,name:my_data.name,bd:'',dd:'',fold:0,sex,spouses:[],parents:[],kids:[]}
+		familyData[0]={id:0,name:my_data.name,bd:'',dd:'',fold:0,sex,spouses:[],parents:[],kids:[]}		
+		photo_loader.add({id:0,url:my_data.orig_pic_url})
+
 	}else{
 		//загружаем основного для отображения на кнопке
 		photo_loader.add({id:0})
