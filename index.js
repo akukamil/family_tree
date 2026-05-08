@@ -1119,7 +1119,7 @@ photo_loader={
 	on:0,
 	add(data){
 
-		if (!familyData[data.id].photo) return
+		if (!data.url&&!familyData[data.id].photo) return
 
 		if (this.queue.find(v=>v.id===data.id)||this.done.includes(data.id)) return
 		this.queue.push(data)
@@ -1143,7 +1143,7 @@ photo_loader={
 		this.on=1
 		const data=this.queue.shift()
 		const id=data.id
-		const url=data.url
+		const url=data.url||`https://mtserver2.ru:8443/get?uid=${my_data.uid}&file=${id}.jpg`
 		this.done.push(id)
 
 
@@ -1153,7 +1153,7 @@ photo_loader={
 		need_render=1
 
 		try{
-			const t=await PIXI.Texture.fromURL(`https://mtserver2.ru:8443/get?uid=${my_data.uid}&file=${id}.jpg`)
+			const t=await PIXI.Texture.fromURL(url)
 			this.cache[id]=t
 		}catch(e){
 			this.cache[id]=assets.nophoto
