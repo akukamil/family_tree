@@ -2739,7 +2739,8 @@ add_dlg={
 
 	ok_down(){
 
-
+		if (anim3.any_on()) return
+		
 		if (this.type==='add_child'){
 
 			if (!this.updated.name){
@@ -2834,12 +2835,17 @@ add_dlg={
 	},
 
 	close_down(){
-
+		if (anim3.any_on()) return
 		this.close()
 
 	},
 
 	close(){
+		
+		//закрываем клавиатуру если она вдруг открыта
+		if(objects.chat_keyboard_cont.visible)
+			keyboard.close()
+		
 		anim3.add(objects.add_dlg_cont,{alpha:[1, 0,'linear']}, false, 0.5)
 	}
 
