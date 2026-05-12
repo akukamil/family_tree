@@ -2611,6 +2611,7 @@ add_dlg={
 	},
 
 	async photo_down(){
+		if(this.type!=='edit') return
 		need_render=1
 		objects.photo_preview_cont.visible=true
 		objects.photo_preview.texture=photo_loader.cache[this.id]||assets.nophoto
