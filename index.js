@@ -2560,7 +2560,8 @@ add_dlg={
 		const name=await keyboard.read(20)
 		if(!name) return
 		if (name.replaceAll(' ','').length>1){
-			objects.add_dlg_name_t.text=name
+			
+			objects.add_dlg_name_t.set2(name,250)
 			this.updated.name=1
 		}else{
 			
@@ -2572,7 +2573,10 @@ add_dlg={
 
 	async edit_bd_down(){
 
-		const date_s=await dp.show()
+		const pdata=familyData[this.id]
+		const bd=pdata.bd
+
+		const date_s=await dp.show(bd)
 		if(!date_s) return
 		need_render=1
 		objects.add_dlg_bd_t.text=date_s
@@ -2582,7 +2586,10 @@ add_dlg={
 
 	async edit_dd_down(){
 
-		const date_s=await dp.show()
+		const pdata=familyData[this.id]
+		const dd=pdata.dd
+
+		const date_s=await dp.show(dd)
 		if(!date_s) return
 		need_render=1
 		objects.add_dlg_dd_t.text=date_s
@@ -2907,10 +2914,16 @@ dp={
 	days_in_month:30,
 	resolver:0,
 
-	show(){
+	show(date){
 		
 		objects.dp_cont.visible=true
-		this.set_date(1,1,2000)
+		
+		if(date){
+			const [day, month, year] = date.split('.');
+			this.set_date(+day,+month,+year)
+		}
+		else
+			this.set_date(1,1,2000)
 		need_render=1
 		return new Promise(res=>{
 			this.resolver=res
@@ -3008,7 +3021,7 @@ dp={
 	switch_year(d){
 		
 		const y=this.cur_year+d
-		if (y<1800||y>1999){
+		if (y<1800||y>2999){
 			sys_msg.add('Данный год недоступен')
 			return
 		}
