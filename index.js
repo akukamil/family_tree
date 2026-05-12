@@ -1149,7 +1149,7 @@ photo_loader={
 
 		if(!objects.load_info_cont.visible)
 			anim3.add(objects.load_info_cont,{y:[-100,objects.load_info_cont.sy,'linear']}, true, 0.25)
-		objects.load_info_t.text='Загрузка...'+this.queue.length
+		objects.load_info_t.text='Загрузка...'+(this.queue.length+1)
 		need_render=1
 
 		try{
@@ -2560,9 +2560,12 @@ add_dlg={
 
 		const name=await keyboard.read(20)
 		if(!name) return
-		if (name.length>1){
+		if (name.replaceAll(' ','').length>1){
 			objects.add_dlg_name_t.text=name
 			this.updated.name=1
+		}else{
+			
+			sys_msg.add('Некорректное имя!')
 		}
 		need_render=1
 
