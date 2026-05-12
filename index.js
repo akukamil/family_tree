@@ -614,7 +614,6 @@ class new_person_card_class extends PIXI.Container{
 			this.bcg.height=80
 		}
 
-
 		this.photo=new PIXI.Graphics()
 		this.photo.clear()
 		this.photo.beginFill(0x333355)
@@ -679,7 +678,7 @@ class new_person_card_class extends PIXI.Container{
 		this.rel_t.y=params.rel_t_y||57
 		this.rel_t.tint=0x59CEC9
 
-		this.age_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: 19})
+		this.age_t=new PIXI.BitmapText('', {fontName: 'bahnschrift48',fontSize: params.age_font_size||19})
 		this.age_t.y=params.age_t_y||40
 		this.age_t.tint=0xEFC7A4
 
