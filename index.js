@@ -3067,11 +3067,12 @@ dp={
 
 	close(){
 		objects.dp_cont.visible=false
+		need_render=1
 	},
 
 	update_date(){
 
-		console.log('update_date')
+		//console.log('update_date')
 		const date=new Date(this.cur_year,this.cur_month-1,this.cur_day)
 		objects.dp_cur_date_t.text=date.toLocaleDateString('ru-Ru').replace(/\//g, '.')
 		need_render=1
