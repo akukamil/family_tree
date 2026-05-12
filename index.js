@@ -2722,11 +2722,6 @@ add_dlg={
 
 		delete familyData[this.id]
 
-		s3.deleteObjects({Bucket:BUCKET_NAME,Delete: {Objects: [{Key: my_data.uid+'/img'+this.id}]}}, function(err, data) {
-			if (err) console.log(err, err.stack);
-			else console.log('Deleted', data);
-		});
-
 		tree.make_rel_graph()
 		
 		//показываем/обновляем дерево
