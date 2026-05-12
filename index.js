@@ -1227,7 +1227,8 @@ tree={
 	initialPinchDist:null,
 	start_scale:0,
 	start_center:0,
-	cards_width:0,
+	minx:0,
+	maxx:0,
 
 	make_rel_graph(tar_id=0) {
 
@@ -1360,15 +1361,33 @@ tree={
 
 	},
 
-	calc_cards_width(){
+	update_boundaries(){
 
+		//вычисляем общую ширину для корректного отображения
 		let tot_w=0
 		for (const card of objects.cards_pool){
 			if(!card.visible) continue
 			tot_w=Math.max(tot_w,card.x+card.width)
 		}
-		this.cards_width=tot_w
-
+		
+		const scale=objects.cards_cont.scale_xy
+		const width=tot_w*scale
+		const height=objects.cards_cont.height
+		
+		//обновляем границы
+		this.maxx=0
+		if (width<M_WIDTH)
+			this.minx=0
+		else
+			this.minx=M_WIDTH-width
+		
+		
+		this.maxy=0
+		if (height<M_HEIGHT)
+			this.miny=0
+		else
+			this.miny=M_HEIGHT-height
+		
 	},
 
 	get_new_id(){
@@ -1481,7 +1500,7 @@ tree={
 		this.show_person_rec(person_id,0,0)
 
 		//ширина дерева, но только карточки
-		this.calc_cards_width()
+		this.update_boundaries()
 	},
 
 	show_person_rec(person_id,x,lev){
@@ -1569,7 +1588,7 @@ tree={
 
 		const cur_scale=objects.cards_cont.scale_xy
 		let new_scale=cur_scale+dir*0.1
-		if (new_scale>2 || new_scale<0.1){
+		if (new_scale>2 || new_scale<0.2){
 			return
 		}
 		new_scale=Math.round(new_scale * 10) / 10
@@ -1578,7 +1597,7 @@ tree={
 		anim3.add(objects.cards_cont,{scale_xy:[cur_scale, new_scale,'linear']}, true, 0.15);
 
 		objects.cards_cont.scale_xy=new_scale
-
+		this.update_boundaries()
 	},
 
 	vec_dist(v1,v2){
@@ -1671,7 +1690,10 @@ tree={
 			let newScale = this.start_scale * scaleFactor
 			if (newScale>2) newScale=2
 			if (newScale<0.7) newScale=0.7
-			objects.cards_cont.scale_xy = newScale
+			
+			//отображаем новый масштаб
+			new_scale=Math.round(new_scale * 10) / 10
+			objects.controls_scale_t.text=+new_scale
 
 			const curCenter = this.mid_point(touchList[0].current,touchList[1].current)
 			const dx = curCenter.x - this.start_center.x
@@ -1683,6 +1705,8 @@ tree={
 
 			if (objects.cards_cont.x>0)	objects.cards_cont.x=0
 			if (objects.cards_cont.y>0)	objects.cards_cont.y=0
+			
+			this.update_boundaries()
 		}
 
 		// 🟢 DRAG
@@ -1695,15 +1719,15 @@ tree={
 			}
 
 			let new_x=objects.cards_cont.x + d_vec.x
-			let new_right_x=new_x+this.cards_width
 			let new_y=objects.cards_cont.y + d_vec.y
-			let new_bot_y=new_y+objects.cards_cont.height
 
-			if (!(new_x>0 || new_right_x<M_WIDTH))
-				objects.cards_cont.x=new_x
+			if (new_x>this.maxx) new_x=this.maxx
+			if (new_x<this.minx) new_x=this.minx
+			if (new_y>this.maxy) new_y=this.maxy
+			if (new_y<this.miny) new_y=this.miny
 
-			if (!(new_y>0 || new_bot_y<M_HEIGHT))
-				objects.cards_cont.y=new_y
+			objects.cards_cont.x=new_x
+			objects.cards_cont.y=new_y
 
 		}
 	},
@@ -1818,10 +1842,11 @@ tree={
 		if(objects.pl_cont.visible) return
 
 		let new_y=objects.cards_cont.y-20*Math.sign(e.deltaY)
-		let new_bot_y=new_y+objects.cards_cont.height
-
-		if (!(new_y>0 || new_bot_y<M_HEIGHT))
-			objects.cards_cont.y=new_y
+		
+		if (new_y>this.maxy) new_y=this.maxy	
+		if (new_y<this.miny) new_y=this.miny	
+		
+		objects.cards_cont.y=new_y
 		need_render=1
 	},
 
@@ -1930,8 +1955,8 @@ rel={
 	drag:0,
 	drag_prev:{x:0,y:0},
 	drag_current:{x:0,y:0},
-	cards_width:0,
-	cards_height:0,
+	minx:0,
+	maxx:0,
 
 	activate(){
 
@@ -2002,14 +2027,24 @@ rel={
 
 	},
 
-	calc_cards_width(){
+	update_boundaries(){
 
-		let tot_w=0
-		for (const card of objects.rel_cards_pool){
-			if(!card.visible) continue
-			tot_w=Math.max(tot_w,card.x+card.width)
-		}
-		this.cards_width=tot_w
+		const width=objects.rel_tree_cont.width
+		const height=objects.rel_tree_cont.height+20
+		
+		//обновляем границы
+		this.maxx=this.left_x_cont
+		if (width<M_WIDTH)
+			this.minx=this.left_x_cont
+		else
+			this.minx=M_WIDTH-width
+		
+		this.maxy=120
+		if (height<M_HEIGHT-120)
+			this.miny=120
+		else
+			this.miny=M_HEIGHT-height
+
 
 	},
 
@@ -2025,7 +2060,6 @@ rel={
 		this.cards_height=(cards_num*60)+(cards_num-1)*10+20
 
 	},
-
 
 	update(){
 
@@ -2110,8 +2144,8 @@ rel={
 		this.left_x_cont=-min_x*60
 		objects.rel_tree_cont.x=this.left_x_cont
 
-		this.calc_cards_width()
-		this.calc_cards_height()
+		this.update_boundaries()
+		//this.calc_cards_height()
 	},
 
 	down(e){
@@ -2150,16 +2184,26 @@ rel={
 		this.drag_prev.y=this.drag_current.y
 
 		let new_x=objects.rel_tree_cont.x + d_vec.x
-		let new_right_x=new_x+this.cards_width
 		let new_y=objects.rel_tree_cont.y + d_vec.y
-		let new_bot_y=new_y+this.cards_height
 
-
-		if (!(new_x>0 || new_right_x<M_WIDTH))
-			objects.rel_tree_cont.x=new_x
-
-		if (!(new_y>objects.rel_tree_cont.sy || new_bot_y<M_HEIGHT))
-			objects.rel_tree_cont.y=new_y
+		if (d_vec.x>0)
+			if (new_x>this.maxx)
+				new_x=this.maxx
+		
+		if (d_vec.x<0)
+			if (new_x<this.minx)
+				new_x=this.minx
+			
+		if (d_vec.y>0)
+			if (new_y>this.maxy)
+				new_y=this.maxy
+		
+		if (d_vec.y<0)
+			if (new_y<this.miny)
+				new_y=this.miny	
+			
+		objects.rel_tree_cont.x=new_x
+		objects.rel_tree_cont.y=new_y
 
 	},
 
