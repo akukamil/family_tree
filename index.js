@@ -2691,14 +2691,13 @@ add_dlg={
 
 	async remove_person_down(){
 
-
-		if (familyData[this.id].kids.length){
-			sys_msg.add('Нужно сначала удалить потомков!')
-			return
-		}
-
 		if (this.id===0){
 			sys_msg.add('Нельзя удалять основного человека')
+			return
+		}
+		
+		if (familyData[this.id].kids.length){
+			sys_msg.add('Нужно сначала удалить потомков!')
 			return
 		}
 
