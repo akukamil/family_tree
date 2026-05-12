@@ -1588,9 +1588,9 @@ tree={
 
 		const cur_scale=objects.cards_cont.scale_xy
 		let new_scale=cur_scale+dir*0.1
-		if (new_scale>2 || new_scale<0.2){
+		if (new_scale>2 || new_scale<0.5)
 			return
-		}
+		
 		new_scale=Math.round(new_scale * 10) / 10
 
 		objects.controls_scale_t.text=+new_scale
