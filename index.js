@@ -1096,13 +1096,14 @@ async function upload_texture(id){
 		const result = await response.json();
 
 		if (response.ok) {
-			console.log('Photo saved:', result.filename);
+			sys_msg.add('Фото сохранено!')
 			return result;
 		} else {
 			throw new Error(result.error);
 		}
 
 	} catch (error) {
+		sys_msg.add('Ошибка при сохранении фото!')
 		console.error('Failed to send photo:', error);
 		throw error;
 	}
@@ -1786,13 +1787,14 @@ tree={
 			const result = await response.json();
 
 			if (response.ok) {
-				console.log('Photo saved:');
+				sys_msg.add('Данные сохранены!')
 				return result;
 			} else {
 				throw new Error(result.error);
 			}
 
 		} catch (error) {
+			sys_msg.add('Ошибка при сохранении!')
 			console.error('Failed to send photo:', error);
 			throw error;
 		}
@@ -2522,10 +2524,26 @@ add_dlg={
 	async edit_bd_down(){
 
 		const pdata=familyData[this.id]
-		const bd=pdata.bd
+		const bd=objects.add_dlg_bd_t.text||pdata.bd
+		const dd=objects.add_dlg_dd_t.text||pdata.dd
 
 		const date_s=await dp.show(bd)
 		if(!date_s) return
+				
+			
+		if(dd){			
+			const [bd_d, bd_m, bd_y] = date_s.split('.');
+			const [dd_d, dd_m, dd_y] = dd.split('.');
+			
+			const bd_date = new Date(bd_y,bd_m-1,bd_d);
+			const dd_date = new Date(dd_y,dd_m-1,dd_d);
+			
+			if (bd_date>dd_date){				
+				sys_msg.add('Дата рождения позже даты смерти!')
+				return
+			}
+		}		
+		
 		need_render=1
 		objects.add_dlg_bd_t.text=date_s
 		this.updated.bd=1
@@ -2535,14 +2553,45 @@ add_dlg={
 	async edit_dd_down(){
 
 		const pdata=familyData[this.id]
-		const dd=pdata.dd
+		const bd=objects.add_dlg_bd_t.text||pdata.bd
+		const dd=objects.add_dlg_dd_t.text||pdata.dd
 
 		const date_s=await dp.show(dd)
 		if(!date_s) return
+		
+		if(bd){			
+			const [bd_d, bd_m, bd_y] = bd.split('.');
+			const [dd_d, dd_m, dd_y] = date_s.split('.');
+			
+			const bd_date = new Date(bd_y,bd_m-1,bd_d);
+			const dd_date = new Date(dd_y,dd_m-1,dd_d);
+			
+			if (dd_date<bd_date){				
+				sys_msg.add('Дата смерти раньше даты рождения!')
+				return
+			}
+		}	
+		
 		need_render=1
 		objects.add_dlg_dd_t.text=date_s
 		this.updated.dd=1
 
+	},
+
+	delete_bd_down(){
+		
+		need_render=1
+		objects.add_dlg_bd_t.text=''
+		this.updated.bd=1
+		
+	},
+	
+	delete_dd_down(){
+		
+		need_render=1
+		objects.add_dlg_dd_t.text=''
+		this.updated.dd=1
+		
 	},
 
 	async edit_photo_down(){
@@ -2770,8 +2819,6 @@ add_dlg={
 
 		}
 		
-		
-		
 
 		//this.set_photo(objects.add_dlg_photo.texture)
 		if (this.id&&this.updated)
@@ -2880,7 +2927,6 @@ dp={
 
 	set_date(d,m,y){
 
-		console.log('set_date')
 		//устанавливаем год
 		this.set_year(y)
 		this.set_month(m)
