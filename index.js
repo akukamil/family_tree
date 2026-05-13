@@ -2419,6 +2419,14 @@ add_dlg={
 		this.card=card
 		this.id=card?.id
 		need_render=1
+		
+		const pdata=familyData[this.id]
+		
+		//если данных нет то это родитель в шапке
+		if (pdata.empty) type='add_parent'
+				
+		this.type=type
+		
 
 		if (type==='add_first_person'){
 			objects.add_dlg_info_t.text='Добавление первого человека'
@@ -2472,18 +2480,34 @@ add_dlg={
 		}
 
 		if (type==='edit'){
-
+			
 			objects.add_dlg_opt_btn.visible=true
 			objects.add_dlg_info_t.text='Редактирование'
-			objects.add_dlg_name_t.text=familyData[this.id].name||''
-			objects.add_dlg_bd_t.text=familyData[this.id].bd||''
-			objects.add_dlg_dd_t.text=familyData[this.id].dd||''
+			objects.add_dlg_name_t.text=pdata.name||''
+			objects.add_dlg_bd_t.text=pdata.bd||''
+			objects.add_dlg_dd_t.text=pdata.dd||''
 			objects.add_dlg_photo.set_texture(photo_loader.cache[this.id]||assets.nophoto)
-			this.set_sex(familyData[card.id].sex)
+			this.set_sex(pdata.sex)
 
 			objects.add_dlg_opt_btn.texture=assets.remove_person_btn_img
 			objects.add_dlg_opt_btn.pointerdown=()=>{this.remove_person_down()}
 		}
+		
+		if (type==='add_parent'){
+			
+			objects.add_dlg_opt_btn.visible=false
+			objects.add_dlg_info_t.text='Добавление родителя'
+			objects.add_dlg_name_t.text=''
+			objects.add_dlg_bd_t.text=''
+			objects.add_dlg_dd_t.text=''
+			objects.add_dlg_photo.set_texture(assets.nophoto)
+			this.set_sex(1)
+
+			objects.add_dlg_opt_btn.texture=assets.select_person_btn_img
+			objects.add_dlg_opt_btn.pointerdown=()=>{this.select_person_down()}
+		}
+		
+		
 
 		anim3.add(objects.add_dlg_cont,{alpha:[0,1,'linear']}, true, 0.25)
 
@@ -2509,12 +2533,10 @@ add_dlg={
 
 		const name=await keyboard.read(20)
 		if(!name) return
-		if (name.replaceAll(' ','').length>1){
-			
+		if (name.replaceAll(' ','').length>1){			
 			objects.add_dlg_name_t.set2(name,250)
 			this.updated.name=1
-		}else{
-			
+		}else{			
 			sys_msg.add('Некорректное имя!')
 		}
 		need_render=1
@@ -2791,8 +2813,28 @@ add_dlg={
 				upload_texture(new_id)
 			}
 		}
+		
+		if (this.type==='add_parent'){
 
-		if (this.type==='edit'){
+			if (!this.updated.name){
+				sys_msg.add('Нужно добавить имя!')
+				return
+			}
+
+			const pdata=familyData[this.id]
+			pdata.name=objects.add_dlg_name_t.text
+			pdata.bd=objects.add_dlg_bd_t.text
+			pdata.dd=objects.add_dlg_dd_t.text
+			pdata.sex=this.sex
+
+			if (this.updated_photo)	{
+				familyData[new_id].photo=1
+				photo_loader.cache[new_id]=new PIXI.Texture(this.updated_photo.baseTexture)
+				upload_texture(new_id)
+			}
+		}
+
+		if (this.type==='edit'){			
 
 			if(Object.keys(this.updated).length) {
 
@@ -2813,6 +2855,9 @@ add_dlg={
 
 			}
 		}
+		
+		
+		
 
 		if (this.type==='removed'){
 
@@ -2821,7 +2866,7 @@ add_dlg={
 		
 
 		//this.set_photo(objects.add_dlg_photo.texture)
-		if (this.id&&this.updated)
+		if (this.id&&Object.keys(this.updated).length)
 			delete familyData[this.id].empty
 
 		tree.make_rel_graph()
