@@ -1759,12 +1759,14 @@ tree={
 		//return
 		const new_obj=JSON.parse(JSON.stringify(familyData))
 
+		//убираем ненужные данные
 		for (const key of Object.keys(new_obj)){
 
 			const obj=new_obj[key]
 
 			delete obj.gen
 			delete obj.rel
+			delete obj.rel_dist
 			if (obj.empty)
 				delete new_obj[key]
 		}
