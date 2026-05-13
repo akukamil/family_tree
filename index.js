@@ -1860,61 +1860,7 @@ tree={
 
 	async remove(uid) {
 
-		try {
-			let isTruncated = true;
-			let continuationToken = null;
-			let totalDeleted = 0;
-			let objectsList = [];
-
-			// First, list all objects
-			while (isTruncated) {
-				const params = {
-					Bucket: BUCKET_NAME,
-					Prefix: uid,
-					ContinuationToken: continuationToken
-				};
-
-				const data = await s3.listObjectsV2(params).promise();
-
-				if (data.Contents && data.Contents.length > 0) {
-					objectsList.push(...data.Contents);
-				}
-
-				isTruncated = data.IsTruncated;
-				continuationToken = data.NextContinuationToken;
-			}
-
-			console.log(`Found ${objectsList.length} objects to delete`);
-
-			// Delete objects in batches of 1000
-			for (let i = 0; i < objectsList.length; i += 1000) {
-				const batch = objectsList.slice(i, i + 1000);
-				const deleteParams = {
-					Bucket: BUCKET_NAME,
-					Delete: {
-						Objects: batch.map(obj => ({ Key: obj.Key })),
-						Quiet: false
-					}
-				};
-
-				const deleteData = await s3.deleteObjects(deleteParams).promise();
-				totalDeleted += deleteData.Deleted?.length || 0;
-
-				console.log(`Deleted batch ${Math.floor(i/1000) + 1}: ${deleteData.Deleted?.length} objects`);
-
-				// Optional: Add delay to avoid rate limiting
-				if (i + 1000 < objectsList.length) {
-					await new Promise(resolve => setTimeout(resolve, 100));
-				}
-			}
-
-			console.log(`Successfully deleted ${totalDeleted} from bucket`);
-			return totalDeleted;
-
-		} catch (error) {
-			console.error('Error deleting objects:', error);
-			throw error;
-		}
+	
 	},
 
 }
@@ -3913,16 +3859,6 @@ async function init_game_env(lang) {
 
 	await auth2.init()
 
-
-	AWS.config.update({
-		endpoint: 'https://s3.twcstorage.ru',
-		region: 'ru-1',
-		accessKeyId: 'FPUAIRUI9064JC4SZ1TM',
-		secretAccessKey: '75yIFODq85n959C6zDPSAd2evB6ZavQhuxSlRPFf'
-	});
-
-	s3 = new AWS.S3();
-
 	await main_loader.load1()
 	need_render=1
 
@@ -4076,27 +4012,6 @@ async function init_game_env(lang) {
 	})
 
 	tree.make_rel_graph()
-
-
-/*
-	let i=0
-	for (const person of all_persons){
-		try{
-			if (!person.empty){
-				const data = await s3.getObject({Bucket: BUCKET_NAME,Key: my_data.uid+'/img'+person.id}).promise();
-				if (data)
-					photo_loader.cache[person.id]=PIXI.Texture.from(data.Body.toString())
-				need_render=1
-				objects.loading_bar_mask.width=350*i/familyData_size
-				objects.loading_progress_t.text=i+'/'+familyData_size
-			}
-		}catch(e){
-			console.log(e)
-		}
-		i++
-	}*/
-
-	//anim3.add(objects.loading_cont,{alpha:[1, 0,'linear']}, false, 0.5);
 
 
 	//показываем ближайшие дни рождения
