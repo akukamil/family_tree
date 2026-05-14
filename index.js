@@ -1764,12 +1764,9 @@ tree={
 		for (const key of Object.keys(new_obj)){
 
 			const obj=new_obj[key]
-
 			delete obj.gen
 			delete obj.rel
 			delete obj.rel_dist
-			if (obj.empty)
-				delete new_obj[key]
 		}
 
 		try {
@@ -4096,11 +4093,11 @@ async function init_game_env(lang) {
 
 
 	//return
-	//удаляем несуществующие ссылки
-	Object.values(familyData).forEach(v=>{
+	//удаляем несуществующие ссылки на родителей
+	/*Object.values(familyData).forEach(v=>{
 		if (!familyData[v.parents[0]])
 			v.parents=[]
-	})
+	})*/
 
 	tree.make_rel_graph()
 
