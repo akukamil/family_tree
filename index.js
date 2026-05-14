@@ -3978,9 +3978,6 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	//my_data.uid='vk39099558'
-	//my_data.uid='vk51616240'
-	//my_data.uid='vk1022758690'
 
 	main_loader.process_load_list(main_loader.pre_load_list)
 	await main_loader.load2()
@@ -4054,7 +4051,7 @@ async function init_game_env(lang) {
 
 	//dp.show()
 	//return
-/*
+
 	c.addEventListener("touchstart", function(e){
 		for (let i = 0; i < e.changedTouches.length; i++) {
 			tree.down(e.changedTouches[i])
@@ -4070,7 +4067,7 @@ async function init_game_env(lang) {
 			tree.move(e.changedTouches[i])
 		}
 	});
-*/
+
 
 	//загружаем дерево
 	try{
