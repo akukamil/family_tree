@@ -1422,9 +1422,19 @@ tree={
 	show_parents(id){
 
 		let parents=familyData[id].parents
-
-		if(parents[0]===undefined){
-
+		
+		//проверяем есть ли родители с такими индексами в базе
+		
+		let parents_ok=1
+		if (parents[0]===undefined) parents_ok=0
+		if (parents[1]===undefined) parents_ok=0
+		if (parents[0]&&!familyData[parents[0]]) parents_ok=0
+		if (parents[1]&&!familyData[parents[1]]) parents_ok=0
+		
+		
+		if(!parents_ok){
+			familyData[parents[0]]
+			
 			const parent1id=tree.get_new_id()
 			familyData[parent1id]={id:parent1id,name:'',gen:0,empty:1,fold:0,sex:0,spouses:[],parents:[],kids:[id]}
 			const parent1=familyData[parent1id]
@@ -1436,7 +1446,7 @@ tree={
 			parent1.spouses.push(parent2id)
 			parent2.spouses.push(parent1id)
 
-			familyData[id].parents.push(parent1id,parent2id)
+			familyData[id].parents=[parent1id,parent2id]
 			console.log(`созданые родители для ${id}  с ид ${parent1id} и ${parent2id}`)
 			parents=familyData[id].parents
 		}
@@ -3968,9 +3978,9 @@ async function init_game_env(lang) {
 	window.addEventListener('resize', resize);
 
 	main_loop();
-	//my_data.uid='vk39099558'
+	my_data.uid='vk39099558'
 	//my_data.uid='vk51616240'
-	//my_data.uid='debug104'
+	my_data.uid='vk81788122'
 
 	main_loader.process_load_list(main_loader.pre_load_list)
 	await main_loader.load2()
