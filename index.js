@@ -3201,7 +3201,8 @@ dr_dlg={
 			if(p.bd&&!p.dd){
 
 				const days_to_dr=this.daysUntilNextBirthday(p.bd)
-				this.dr_list.push({id:p.id,days_to_dr})
+				if (days_to_dr<30)
+					this.dr_list.push({id:p.id,days_to_dr})
 				//if(this.dr_list.length===5) break
 
 			}
