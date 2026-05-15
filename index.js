@@ -836,7 +836,8 @@ class new_person_card_class extends PIXI.Container{
 		this.id_t.text=person_data.id
 		this.age_t.text=person_data.bd
 
-		const rel_no_sex=rel_map[person_data.sex||0][person_data.rel]
+		const my_sex=familyData[0].sex
+		const rel_no_sex=rel_map[my_sex||0][person_data.rel]
 		const rel_with_sex=rel_no_sex?.[person_data.sex]
 		this.rel_t.text=rel_with_sex||''
 
@@ -934,8 +935,9 @@ class new_person_card_class extends PIXI.Container{
 		this.name_t.set2(pdata.name,140)
 
 		this.id_t.text=this.id
-
-		const rel_no_sex=rel_map[pdata.sex||0][pdata.rel]
+		
+		const my_sex=familyData[0].sex
+		const rel_no_sex=rel_map[my_sex||0][pdata.rel]
 		const rel_with_sex=rel_no_sex?.[pdata.sex]
 		this.rel_t.text=rel_with_sex||''
 
@@ -1048,7 +1050,8 @@ class dr_card_class extends PIXI.Container{
 
 		this.name_t.set2(pdata.name,180)
 
-		const rel_no_sex=rel_map[pdata.sex||0][pdata.rel]
+		const my_sex=familyData[0].sex
+		const rel_no_sex=rel_map[my_sex.sex||0][pdata.rel]
 		const rel_with_sex=rel_no_sex?.[pdata.sex]||''
 
 		const bd=pdata.bd
