@@ -2762,8 +2762,16 @@ add_dlg={
 		tree.make_rel_graph()
 		
 		//показываем/обновляем дерево
-		if(objects.cards_cont.visible)
-			tree.show_root_person({person_id:cur_root_id})
+		if(objects.cards_cont.visible){
+			//если удалили текущую персону то показываем основную
+			if (this.id===cur_root_id){
+				cur_root_id=0
+				tree.show_root_person({person_id:0})				
+			}
+			else
+				tree.show_root_person({person_id:cur_root_id})
+		}
+
 
 		if(objects.pl_cont.visible)
 			pl.activate('show')
@@ -3549,12 +3557,18 @@ keyboard={
 	layout:0,
 	resolver:0,
 	layout_case:0,
+	prv_key:'1',
 
 	MAX_SYMBOLS : 60,
 
-	switch_case(){
+	switch_case(tar_case){
 		
-		this.layout_case=1-this.layout_case
+		if (tar_case!==undefined)
+			this.layout_case=tar_case
+		else
+			this.layout_case=1-this.layout_case
+		
+		
 		if (this.layout===this.ru_keys){
 			objects.chat_keyboard.texture=[assets.rus_layout_up,assets.rus_layout_low][this.layout_case];
 		}else{
@@ -3565,6 +3579,8 @@ keyboard={
 
 	read(max_symb){
 
+		this.prv_key='1'
+		this.switch_case(0)
 		this.MAX_SYMBOLS=max_symb||60;
 		if (!this.layout)this.switch_layout();
 
@@ -3686,9 +3702,26 @@ keyboard={
 			this.switch_case()
 			key ='';
 		}
+		
+
 
 
 		if (this.layout_case===1) key=key.toLowerCase()
+			
+		//большие буквы после пробела
+		if (key&&this.prv_key&&this.layout_case===0){
+			this.switch_case()
+		}		
+		
+		//большие буквы после пробела
+		if (key===' ' &&this.layout_case===1){
+			this.switch_case()
+		}
+		
+
+		
+		this.prv_key=key		
+		
 
 		if (t.length>=this.MAX_SYMBOLS) return;
 
