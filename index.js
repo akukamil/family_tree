@@ -2371,57 +2371,85 @@ add_dlg={
 	resolver:0,
 
 	async choosePhotoAndGetTexture() {
-		// Create file input element
-		if(!my_data.uid.includes('vk'))
-			alert('file')
+
+			
 		const fileInput = document.createElement('input');
 		fileInput.type = 'file';
-		fileInput.accept = 'image/*'; // Only allow image files
-
-		// Create a promise that resolves when user selects a file
+		fileInput.accept = 'image/*';
+		
+		// Important for iOS: append to body temporarily
+		fileInput.style.display = 'none';
+		document.body.appendChild(fileInput);
+		
 		return new Promise((res) => {
+			// Clean up function
+			const cleanup = () => {
+				if (fileInput.parentNode) {
+					fileInput.parentNode.removeChild(fileInput);
+				}
+			};
+			
 			fileInput.onchange = async (event) => {
 				const file = event.target.files[0];
-
+				
 				if (!file) {
-					res(0)
-					return
+					cleanup();
+					res(0);
+					return;
 				}
-
+				
 				try {
-					// Create a URL for the selected file
-					const imageUrl = URL.createObjectURL(file);
-
+					// Use FileReader instead of URL.createObjectURL for iOS compatibility
+					const imageDataUrl = await new Promise((resolveFile, rejectFile) => {
+						const reader = new FileReader();
+						reader.onload = () => resolveFile(reader.result);
+						reader.onerror = rejectFile;
+						reader.readAsDataURL(file);
+					});
+					
 					// Create an image element
 					const img = new Image();
-
+					
 					// Create a promise for image loading
 					await new Promise((resolveImage, rejectImage) => {
 						img.onload = resolveImage;
 						img.onerror = rejectImage;
-						img.src = imageUrl;
+						img.src = imageDataUrl;
 					});
-
+					
 					// Convert to PIXI.Texture
 					const texture = PIXI.Texture.from(img);
-
-					// Clean up the object URL to free memory
-					URL.revokeObjectURL(imageUrl);
-
+					
+					cleanup();
 					res(texture);
 				} catch (error) {
-					res(0)
+					console.error('Error loading image:', error);
+					cleanup();
+					res(0);
 				}
 			};
-
-			// Handle cancellation
-			fileInput.oncancel = () => {
-				res(0)
+			
+			// iOS doesn't support oncancel, use a different approach
+			// Listen for focus change to detect cancellation
+			const handleFocus = () => {
+				window.removeEventListener('focus', handleFocus);
+				// If no file was selected after a short delay, assume cancellation
+				setTimeout(() => {
+					if (!fileInput.files || fileInput.files.length === 0) {
+						cleanup();
+						res(0);
+					}
+				}, 1000);
 			};
-
-			// Trigger file picker
-			fileInput.click();
+			
+			window.addEventListener('focus', handleFocus);
+			
+			// Trigger file picker with a slight delay for iOS
+			setTimeout(() => {
+				fileInput.click();
+			}, 0);
 		});
+
 	},
 
 	activate(card,type){
