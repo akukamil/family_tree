@@ -4110,7 +4110,7 @@ async function init_game_env(lang) {
 
 	//dp.show()
 	//return
-
+	/*
 	c.addEventListener("touchstart", function(e){
 		for (let i = 0; i < e.changedTouches.length; i++) {
 			tree.down(e.changedTouches[i])
@@ -4126,7 +4126,7 @@ async function init_game_env(lang) {
 			tree.move(e.changedTouches[i])
 		}
 	});
-
+	*/
 
 	//загружаем дерево
 	try{
