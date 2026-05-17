@@ -2372,7 +2372,7 @@ add_dlg={
 
 	async choosePhotoAndGetTexture() {
 		// Create file input element
-		if(my_data.uid==='vk39099558')
+		if(!my_data.uid.includes('vk'))
 			alert('file')
 		const fileInput = document.createElement('input');
 		fileInput.type = 'file';
