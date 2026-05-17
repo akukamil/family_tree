@@ -2372,6 +2372,8 @@ add_dlg={
 
 	async choosePhotoAndGetTexture() {
 		// Create file input element
+		if(my_data.uid==='vk39099558')
+			alert('file')
 		const fileInput = document.createElement('input');
 		fileInput.type = 'file';
 		fileInput.accept = 'image/*'; // Only allow image files
