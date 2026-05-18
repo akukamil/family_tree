@@ -9,6 +9,7 @@ let drag=0
 let need_render=1
 const qm_rt={}
 const BUCKET_NAME='gen-tree2'
+const file_input=0
 
 irnd = function(min,max) {
 	min = Math.ceil(min);
@@ -1112,6 +1113,99 @@ async function upload_texture(id){
 	}
 
 }
+
+class ImageLoader {
+	
+	constructor() {
+		this.input = null;
+		this.handleChange = null;
+		this.currentResolve = null;
+		this.currentReject = null;
+		this.init();
+	}
+
+	init() {
+
+		this.input = document.createElement('input');
+		this.input.type = 'file';
+		this.input.accept = 'image/*';
+		this.input.style.display = 'none';
+		document.body.appendChild(this.input);
+
+
+		this.handleChange = (event) => {
+			const file = event.target.files[0];
+
+			if (!file) {
+				this.currentReject(new Error('No file selected'));
+				return;
+			}
+
+			const reader = new FileReader();
+
+			reader.onload = (e) => {
+				const img = new Image();
+
+				img.onload = () => {
+					const texture = PIXI.Texture.from(img);
+					this.currentResolve(texture);
+					this.clearPending();
+				};
+
+				img.onerror = () => {
+					this.currentReject(new Error('Failed to load image'));
+					this.clearPending();
+				};
+
+				img.src = e.target.result;
+			};
+
+			reader.onerror = () => {
+				this.currentReject(new Error('Failed to read file'));
+				this.clearPending();				
+			};
+
+			reader.readAsDataURL(file);
+		};
+
+		// Attach the predefined handler
+		this.input.addEventListener('change', this.handleChange);
+		//window.addEventListener('focus', ()=>{console.log('фокус')});
+	}
+
+	clearPending() {
+		this.currentResolve = null;
+		this.currentReject = null;
+	}
+
+	loadImage() {
+		
+		// Resolve previous hanging promise
+		if (this.currentResolve) {
+			this.currentResolve(null);
+			this.clearPending();
+			console.log('Очищен незавершенный промис')
+		}
+		
+		return new Promise((resolve, reject) => {
+			this.currentResolve = resolve;
+			this.currentReject = reject;
+			this.input.value = '';
+			this.input.click();
+		});
+	}
+
+	destroy() {
+		if (this.input) {
+			this.input.removeEventListener('change', this.handleChange);
+			this.input.remove();
+			this.input = null;
+			this.handleChange = null;
+		}
+	}
+}
+
+const imageLoader = new ImageLoader()
 
 photo_loader={
 
@@ -2372,22 +2466,7 @@ add_dlg={
 
 	async choosePhotoAndGetTexture() {
 
-			
-		const fileInput = document.createElement('input');
-		fileInput.type = 'file';
-		fileInput.accept = 'image/*';
-		
-		// Important for iOS: append to body temporarily
-		fileInput.style.display = 'none';
-		document.body.appendChild(fileInput);
-		
 		return new Promise((res) => {
-			// Clean up function
-			const cleanup = () => {
-				if (fileInput.parentNode) {
-					fileInput.parentNode.removeChild(fileInput);
-				}
-			};
 			
 			fileInput.onchange = async (event) => {
 				const file = event.target.files[0];
@@ -2658,9 +2737,9 @@ add_dlg={
 
 	async edit_photo_down(){
 
-		const t=await this.choosePhotoAndGetTexture()
+		const t=await imageLoader.loadImage()
 		if(!t) {
-			sys_msg.add('Фото не загружено...')
+			//sys_msg.add('Фото не загружено...')
 			return
 		}
 
@@ -4157,7 +4236,7 @@ async function init_game_env(lang) {
 		}
 	});
 	*/
-
+	
 	//загружаем дерево
 	try{
 		
