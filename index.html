@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <meta name="http-equiv" content="Content-type: text/html; charset=windows-1251">
 
@@ -22,7 +22,70 @@ body {
     font-size: 24px;
     font-weight: bold;
 }
+
+.photo-modal {
+	position: fixed;
+	display: none;
+	gap: 1rem;
+	background: white;
+	padding: 1.5rem 2rem;
+	border-radius: 2rem;
+	box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.select-photo-btn {
+	background: #1e3c72;
+	border: none;
+	color: white;
+	font-size: 1rem;
+	font-weight: 500;
+	padding: 0.7rem 1.5rem;
+	border-radius: 3rem;
+	cursor: pointer;
+	font-family: inherit;
+	transition: 0.15s;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+	letter-spacing: 0.3px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+
+.close-btn {
+	background: #eef2f7;
+	border: none;
+	color: #2c3e50;
+	font-size: 1rem;
+	font-weight: 500;
+	padding: 0.7rem 1.5rem;
+	border-radius: 3rem;
+	cursor: pointer;
+	font-family: inherit;
+	transition: 0.15s;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+
 </style>
+
+<div class="photo-modal" id="choose_photo_modal">
+	<button type="button" class="select-photo-btn" id="selectPhotoBtn">
+		📷 Select Photo
+	</button>
+
+	<button type="button" class="close-btn" id="closeBtn">
+		✕ Close
+	</button>
+</div>
+
+
+
 <div class="loading-title"  id="loadingText">Загрузка...</div>
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1354.0.min.js"></script>
 <script src="pixi_scale.min.js" ></script>

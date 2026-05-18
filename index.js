@@ -1114,15 +1114,12 @@ async function upload_texture(id){
 
 }
 
-class ImageLoader {
+imageLoader={
 	
-	constructor() {
-		this.input = null;
-		this.handleChange = null;
-		this.currentResolve = null;
-		this.currentReject = null;
-		this.init();
-	}
+	input:null,
+	handleChange:null,
+	currentResolve:null,
+	currentReject:null,
 
 	init() {
 
@@ -1131,6 +1128,21 @@ class ImageLoader {
 		this.input.accept = 'image/*';
 		this.input.style.display = 'none';
 		document.body.appendChild(this.input);
+		
+		const choose_photo_modal=document.getElementById('choose_photo_modal')
+		const select_photo_btn=document.getElementById('selectPhotoBtn')
+		const close_btn=document.getElementById('closeBtn')
+		
+		select_photo_btn.addEventListener('click', () => {
+			choose_photo_modal.style.display='none'
+			this.input.click();
+		});
+		
+		close_btn.addEventListener('click', () => {
+			this.currentResolve(null);
+			this.clearPending();
+			choose_photo_modal.style.display='none'
+		});
 
 
 		this.handleChange = (event) => {
@@ -1171,12 +1183,32 @@ class ImageLoader {
 		// Attach the predefined handler
 		this.input.addEventListener('change', this.handleChange);
 		//window.addEventListener('focus', ()=>{console.log('фокус')});
-	}
+	},
+	
+	async loadImageIOS(){
+		
+		const choose_photo_modal=document.getElementById('choose_photo_modal')
+		choose_photo_modal.style.display='flex'
+		
+		// Resolve previous hanging promise
+		if (this.currentResolve) {
+			this.currentResolve(null);
+			this.clearPending();
+			console.log('Очищен незавершенный промис')
+		}
+				
+		return new Promise((resolve, reject) => {
+			this.currentResolve = resolve;
+			this.currentReject = reject;
+			this.input.value = '';
+		});
+		
+	},
 
 	clearPending() {
 		this.currentResolve = null;
 		this.currentReject = null;
-	}
+	},
 
 	loadImage() {
 		
@@ -1186,14 +1218,15 @@ class ImageLoader {
 			this.clearPending();
 			console.log('Очищен незавершенный промис')
 		}
-		
+				
 		return new Promise((resolve, reject) => {
 			this.currentResolve = resolve;
 			this.currentReject = reject;
 			this.input.value = '';
 			this.input.click();
 		});
-	}
+	
+	},
 
 	destroy() {
 		if (this.input) {
@@ -1205,7 +1238,6 @@ class ImageLoader {
 	}
 }
 
-const imageLoader = new ImageLoader()
 
 photo_loader={
 
@@ -2737,7 +2769,7 @@ add_dlg={
 
 	async edit_photo_down(){
 
-		const t=await imageLoader.loadImage()
+		const t=await imageLoader.loadImageIOS()
 		if(!t) {
 			//sys_msg.add('Фото не загружено...')
 			return
@@ -4124,12 +4156,10 @@ async function init_game_env(lang) {
 	define_platform_and_language()
 
 	await auth2.init()
-
 	await main_loader.load1()
 	need_render=1
 
-
-	document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(50,60,70,1)}</style>';
+	//document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(50,60,70,1)}</style>';
 	const dw=M_WIDTH/document.body.clientWidth;
 	const dh=M_HEIGHT/document.body.clientHeight;
 	const resolution=Math.min(1.5,window.devicePixelRatio );
@@ -4138,9 +4168,7 @@ async function init_game_env(lang) {
 	app.renderer = new PIXI.Renderer(opts);
 	const c=document.body.appendChild(app.renderer.view);
 	c.style['boxShadow'] = '0 0 15px #ffffff';
-	c.style.outline = '1px solid rgb(60, 60, 60)';
-
-
+	c.style.outline = '1px solid rgb(60, 60, 60)'
 
 	resize();
 	window.addEventListener('resize', resize);
@@ -4187,7 +4215,6 @@ async function init_game_env(lang) {
 		pl.mscroll(e)
 	});
 	window.addEventListener('keydown', function(e) {keyboard.keydown(e.key)});
-
 
 	//создаем комбинации быстрых кнопок
 	const t_spr=new PIXI.Sprite()
@@ -4276,6 +4303,7 @@ async function init_game_env(lang) {
 
 	tree.make_rel_graph()
 
+	imageLoader.init()
 
 	//показываем ближайшие дни рождения
 	dr_dlg.activate()
