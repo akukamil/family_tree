@@ -1117,7 +1117,6 @@ async function upload_texture(id){
 imageLoader={
 	
 	input:null,
-	handleChange:null,
 	currentResolve:null,
 	currentReject:null,
 
@@ -1144,67 +1143,62 @@ imageLoader={
 			choose_photo_modal.style.display='none'
 		});
 
-
-		this.handleChange = (event) => {
-			const file = event.target.files[0];
-
-			if (!file) {
-				this.currentReject(new Error('No file selected'));
-				return;
-			}
-
-			const reader = new FileReader();
-
-			reader.onload = (e) => {
-				const img = new Image();
-
-				img.onload = () => {
-					const texture = PIXI.Texture.from(img);
-					this.currentResolve(texture);
-					this.clearPending();
-				};
-
-				img.onerror = () => {
-					this.currentReject(new Error('Failed to load image'));
-					this.clearPending();
-				};
-
-				img.src = e.target.result;
-			};
-
-			reader.onerror = () => {
-				this.currentReject(new Error('Failed to read file'));
-				this.clearPending();				
-			};
-
-			reader.readAsDataURL(file);
-		};
-
 		// Attach the predefined handler
 		this.input.addEventListener('change', this.handleChange);
 		//window.addEventListener('focus', ()=>{console.log('фокус')});
 	},
 	
-	async loadImageIOS(){
-		
-		const choose_photo_modal=document.getElementById('choose_photo_modal')
-		choose_photo_modal.style.display='flex'
-		
-		// Resolve previous hanging promise
-		if (this.currentResolve) {
-			this.currentResolve(null);
-			this.clearPending();
-			console.log('Очищен незавершенный промис')
-		}
-				
-		return new Promise((resolve, reject) => {
-			this.currentResolve = resolve;
-			this.currentReject = reject;
-			this.input.value = '';
-		});
-		
-	},
+	isIPhone() {
+		const ua = navigator.userAgent || navigator.vendor || window.opera;
 
+		// Real iPhones
+		const isiPhoneUA = /iPhone/i.test(ua);
+
+		// iPadOS Safari can spoof macOS, but iPhones currently do not.
+		// Still, guard against weird edge cases with touch support.
+		const isTouchMac =
+		navigator.platform === 'MacIntel' &&
+		navigator.maxTouchPoints > 1;
+
+		return isiPhoneUA && !isTouchMac;
+	},
+	
+	handleChange(event) {
+		
+		const file = event.target.files[0];
+
+		if (!file) {
+			this.currentResolve(null);
+			return;
+		}
+
+		const reader = new FileReader();
+
+		reader.onload = (e) => {
+			const img = new Image();
+
+			img.onload = () => {
+				const texture = PIXI.Texture.from(img);
+				this.currentResolve(texture);
+				this.clearPending();
+			};
+
+			img.onerror = () => {
+				this.currentReject(new Error('Failed to load image'));
+				this.clearPending();
+			};
+
+			img.src = e.target.result;
+		};
+
+		reader.onerror = () => {
+			this.currentReject(new Error('Failed to read file'));
+			this.clearPending();				
+		};
+
+		reader.readAsDataURL(file);
+	},
+	
 	clearPending() {
 		this.currentResolve = null;
 		this.currentReject = null;
@@ -1218,12 +1212,19 @@ imageLoader={
 			this.clearPending();
 			console.log('Очищен незавершенный промис')
 		}
+		
+		const is_ios=this.isIPhone()
+		if (is_ios){
+			const choose_photo_modal=document.getElementById('choose_photo_modal')
+			choose_photo_modal.style.display='flex'
+		}
 				
 		return new Promise((resolve, reject) => {
 			this.currentResolve = resolve;
 			this.currentReject = reject;
 			this.input.value = '';
-			this.input.click();
+			if(!is_ios)
+				this.input.click()
 		});
 	
 	},
@@ -1237,7 +1238,6 @@ imageLoader={
 		}
 	}
 }
-
 
 photo_loader={
 
@@ -2696,6 +2696,8 @@ add_dlg={
 
 	async edit_bd_down(){
 
+		if (anim3.any_on()) return		
+		
 		const pdata=familyData[this.id]
 		const bd=objects.add_dlg_bd_t.text||pdata.bd
 		const dd=objects.add_dlg_dd_t.text||pdata.dd
@@ -2724,7 +2726,9 @@ add_dlg={
 	},
 
 	async edit_dd_down(){
-
+		
+		if (anim3.any_on()) return		
+		
 		const pdata=familyData[this.id]
 		const bd=objects.add_dlg_bd_t.text||pdata.bd
 		const dd=objects.add_dlg_dd_t.text||pdata.dd
@@ -2769,7 +2773,10 @@ add_dlg={
 
 	async edit_photo_down(){
 
-		const t=await imageLoader.loadImageIOS()
+		if (anim3.any_on()) return		
+		anim3.add(objects.add_dlg_edit_photo_btn,{alpha:[1,0.5,'ease2back']}, true, 0.15)
+
+		const t=await imageLoader.loadImage()
 		if(!t) {
 			//sys_msg.add('Фото не загружено...')
 			return
@@ -3041,7 +3048,9 @@ add_dlg={
 	},
 
 	close_down(){
-		if (anim3.any_on()) return
+		
+		if (anim3.any_on()) return		
+		anim3.add(objects.add_dlg_close_btn,{alpha:[1,0.5,'ease2back']}, true, 0.15)
 		this.close()
 
 	},
