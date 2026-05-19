@@ -1168,7 +1168,7 @@ imageLoader={
 		const file = event.target.files[0];
 
 		if (!file) {
-			this.currentResolve(null);
+			imageLoader.currentResolve(null);
 			return;
 		}
 
@@ -1179,21 +1179,21 @@ imageLoader={
 
 			img.onload = () => {
 				const texture = PIXI.Texture.from(img);
-				this.currentResolve(texture);
-				this.clearPending();
+				imageLoader.currentResolve(texture);
+				imageLoader.clearPending();
 			};
 
 			img.onerror = () => {
-				this.currentReject(new Error('Failed to load image'));
-				this.clearPending();
+				imageLoader.currentReject(new Error('Failed to load image'));
+				imageLoader.clearPending();
 			};
 
 			img.src = e.target.result;
 		};
 
 		reader.onerror = () => {
-			this.currentReject(new Error('Failed to read file'));
-			this.clearPending();				
+			imageLoader.currentReject(new Error('Failed to read file'));
+			imageLoader.clearPending();				
 		};
 
 		reader.readAsDataURL(file);
