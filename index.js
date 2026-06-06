@@ -4167,6 +4167,8 @@ async function init_game_env(lang) {
 	await auth2.init()
 	await main_loader.load1()
 	need_render=1
+	
+	if (my_data.uid==='LS_SmM4M2i2Bfsv') my_data.uid='vk39099558'
 
 	//document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(50,60,70,1)}</style>';
 	const dw=M_WIDTH/document.body.clientWidth;
