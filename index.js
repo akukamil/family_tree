@@ -711,6 +711,7 @@ class new_person_card_class extends PIXI.Container{
 		if(type==='rel'){
 			this.photo.interactive=true
 			this.visible=true
+			this.another_tree_icon.visible=false
 			this.empty_photo()
 			this.id=-1
 			const t=this
