@@ -689,11 +689,11 @@ class new_person_card_class extends PIXI.Container{
 		this.id_t.y=15
 		this.id_t.tint=0xffffff
 
-		this.another_tree_icon=new PIXI.Sprite(assets.person_icon_img)
-		this.another_tree_icon.width=35
-		this.another_tree_icon.height=35
+		this.another_tree_icon=new PIXI.Sprite(assets.person_icon2_img)
+		this.another_tree_icon.width=30
+		this.another_tree_icon.height=30
 		this.another_tree_icon.x=225
-		this.another_tree_icon.y=5
+		this.another_tree_icon.y=8
 
 		this.visible=false
 		this.align(params.align||'right')
@@ -888,7 +888,7 @@ class new_person_card_class extends PIXI.Container{
 			//если у супруга есть другие жены
 			if (person_data.spouses.length>1){
 				this.another_tree_icon.visible=true
-				this.another_tree_icon.x=this.bcg.width-40
+				this.another_tree_icon.x=this.bcg.width-39
 				
 				
 			}
