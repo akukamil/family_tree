@@ -940,9 +940,10 @@ class new_person_card_class extends PIXI.Container{
 		this.update_photo()
 
 		const pdata=familyData[this.id]
-
+		
 		this.name_t.set2(pdata.name,140)
-
+		
+		this.another_tree_icon.visible=false
 		this.id_t.text=this.id
 		
 		const my_sex=familyData[0].sex
