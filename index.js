@@ -689,12 +689,18 @@ class new_person_card_class extends PIXI.Container{
 		this.id_t.y=15
 		this.id_t.tint=0xffffff
 
+		this.another_tree_icon=new PIXI.Sprite(assets.person_icon_img)
+		this.another_tree_icon.width=35
+		this.another_tree_icon.height=35
+		this.another_tree_icon.x=225
+		this.another_tree_icon.y=5
+
 		this.visible=false
 		this.align(params.align||'right')
 
 		if (params.bcg) this.addChild(this.bcg)
 
-		this.addChild(this.photo,this.name_t,this.age_t,this.rel_t)
+		this.addChild(this.photo,this.name_t,this.age_t,this.rel_t,this.another_tree_icon)
 		//this.addChild(this.id_t)
 		if (this.quick_menu) this.addChild(this.quick_menu)
 
@@ -842,12 +848,10 @@ class new_person_card_class extends PIXI.Container{
 		const rel_with_sex=rel_no_sex?.[person_data.sex]
 		this.rel_t.text=rel_with_sex||''
 
-		//const russianNames=namesByGender[person_data.sex]
-		//this.name_t.text=russianNames[irnd(0,russianNames.length-1)]
-
 		this.name_t.set2(person_data.name,150)
 		this.quick_menu.interactive=true
 		this.type=type
+		this.another_tree_icon.visible=false
 
 		if (type==='parent'){
 
@@ -880,6 +884,15 @@ class new_person_card_class extends PIXI.Container{
 				this.quick_menu.texture=qm_rt.qm_kid_nof
 				this.bcg.texture=assets.card_bcg_short
 			}
+			
+			//если у супруга есть другие жены
+			if (person_data.spouses.length>1){
+				this.another_tree_icon.visible=true
+				this.another_tree_icon.x=this.bcg.width-40
+				
+				
+			}
+
 		}
 
 		if (type==='kid'){
@@ -927,11 +940,6 @@ class new_person_card_class extends PIXI.Container{
 		this.update_photo()
 
 		const pdata=familyData[this.id]
-
-
-
-		//const russianNames=namesByGender[pdata.sex]
-		//this.name_t.text=russianNames[irnd(0,russianNames.length-1)]
 
 		this.name_t.set2(pdata.name,140)
 
@@ -4169,6 +4177,7 @@ async function init_game_env(lang) {
 	need_render=1
 	
 	if (my_data.uid==='LS_SmM4M2i2Bfsv') my_data.uid='vk39099558'
+	//my_data.uid='vk39099558'
 
 	//document.body.innerHTML='<style>html,body {margin: 0;padding: 0;height: 100%;}body {display: flex;align-items:center;justify-content: center;background-color: rgba(50,60,70,1)}</style>';
 	const dw=M_WIDTH/document.body.clientWidth;
