@@ -1074,10 +1074,11 @@ class dr_card_class extends PIXI.Container{
 			const age=this.getFullYears(bd)
 			this.bd_t.text=bd+' | ' +rel_with_sex
 
-
-			const new_age=age+1
-			let info_str=days_to_dr?'Через\n'+dr_dlg.getDayWord(days_to_dr)+'':'Сегодня!'
-			info_str+=('\n'+new_age+this.getYearString(new_age))
+			let new_age=age
+			if(days_to_dr) new_age++
+				
+			let info_str=days_to_dr?'Через\n'+dr_dlg.getDayWord(days_to_dr)+'':'Сегодня!'						
+			info_str+=('\n'+new_age+this.getYearString(new_age))			
 			this.dr_t.text=info_str
 
 		}
