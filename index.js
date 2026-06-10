@@ -1078,7 +1078,7 @@ class dr_card_class extends PIXI.Container{
 			if(days_to_dr) new_age++
 				
 			let info_str=days_to_dr?'Через\n'+dr_dlg.getDayWord(days_to_dr)+'':'Сегодня!'						
-			info_str+=('\n'+new_age+this.getYearString(new_age))			
+			info_str+=('\n'+new_age+' '+this.getYearString(new_age))			
 			this.dr_t.text=info_str
 
 		}
