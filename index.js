@@ -887,11 +887,9 @@ class new_person_card_class extends PIXI.Container{
 			}
 			
 			//если у супруга есть другие жены
-			if (person_data.spouses.length>1){
+			if (person_data.spouses.length>1||person_data.parents.length){
 				this.another_tree_icon.visible=true
 				this.another_tree_icon.x=this.bcg.width-39
-				
-				
 			}
 
 		}
