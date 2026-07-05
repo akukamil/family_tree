@@ -275,7 +275,6 @@ anim3={
 				slot.p_resolve = resolve;
 			});
 		}
-	привет
 
 		console.log("Р В РЎв„ўР В РЎвЂўР В Р вЂ¦Р РЋРІР‚РЋР В РЎвЂР В Р’В»Р В РЎвЂР РЋР С“Р РЋР Р‰ Р РЋР С“Р В Р’В»Р В РЎвЂўР РЋРІР‚С™Р РЋРІР‚в„– Р В Р’В°Р В Р вЂ¦Р В РЎвЂР В РЎВР В Р’В°Р РЋРІР‚В Р В РЎвЂР В РЎвЂ");
 
@@ -1065,7 +1064,7 @@ class dr_card_class extends PIXI.Container{
 		this.name_t.set2(pdata.name,180)
 
 		const my_sex=familyData[0].sex
-		const rel_no_sex=rel_map[my_sex.sex||0][pdata.rel]
+		const rel_no_sex=rel_map[my_sex||0][pdata.rel]
 		const rel_with_sex=rel_no_sex?.[pdata.sex]||''
 
 		const bd=pdata.bd
@@ -1483,7 +1482,8 @@ tree={
 
 
 		tree.save()
-		show_root_person(({person_id:cur_root_id}))
+		tree.show_root_person({person_id:cur_root_id})
+
 	},
 
 	change_auto_fold_lev(d){
@@ -1540,11 +1540,11 @@ tree={
 
 	get_spouses(p_id){
 
-		let p_data=familyData[p_id]
-		if (p_data.link)
+		let pdata=familyData[p_id]
+		if (pdata.link)
 			pdata=familyData[pdata.link]
 		const spouses=[]
-		for (const s_id of p_data.spouses){
+		for (const s_id of pdata.spouses){
 			spouses.push(familyData[s_id])
 		}
 		return spouses
@@ -3008,9 +3008,9 @@ add_dlg={
 			pdata.sex=this.sex
 
 			if (this.updated_photo)	{
-				familyData[new_id].photo=1
-				photo_loader.cache[new_id]=new PIXI.Texture(this.updated_photo.baseTexture)
-				upload_texture(new_id)
+				familyData[this.id].photo=1
+				photo_loader.cache[this.id]=new PIXI.Texture(this.updated_photo.baseTexture)
+				upload_texture(this.id)
 			}
 		}
 
