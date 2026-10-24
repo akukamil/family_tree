@@ -2696,10 +2696,10 @@ add_dlg={
 
 	async edit_name_down(){
 
-		const name=await keyboard.read(20)
+		const name=await keyboard.read(35)
 		if(!name) return
 		if (name.replaceAll(' ','').length>1){			
-			objects.add_dlg_name_t.set2(name,250)
+			objects.add_dlg_name_t.set2(name,280)
 			this.updated.name=1
 		}else{			
 			sys_msg.add('Некорректное имя!')
